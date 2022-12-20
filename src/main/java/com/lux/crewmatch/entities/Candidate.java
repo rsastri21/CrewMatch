@@ -12,6 +12,9 @@ public class Candidate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "NAME")
+    private String name;
+
     @Column(name = "PRONOUNS")
     private String pronouns;
 
@@ -56,6 +59,14 @@ public class Candidate {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPronouns() {
