@@ -40,7 +40,7 @@ public class CSVHelper {
      *  Returns:
      *      A boolean indicating whether the uploaded file is a csv.
      */
-    private static boolean isValidFile(MultipartFile file) {
+    public static boolean isValidFile(MultipartFile file) {
 
         return TYPE.equals(file.getContentType());
 
