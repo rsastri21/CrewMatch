@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -44,6 +46,15 @@ public class CandidateController {
         }
 
         return candidate.get();
+    }
+
+    // Get candidates by search
+    @GetMapping("/search")
+    public List<Candidate> searchCandidates(@RequestParam(name = "assigned", required = false) Boolean assigned) {
+        if (assigned != null && !assigned) {
+            return this.candidateRepository.findByAssignedFalse();
+        }
+        return new ArrayList<>();
     }
 
     // Create a new candidate
