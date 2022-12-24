@@ -153,4 +153,12 @@ public class CandidateController {
         return candidateToDelete;
     }
 
+    // Delete all candidates
+    // Intended for internal use -- Publish API endpoint only if behind two-step deletion process.
+    @DeleteMapping("/deleteAll")
+    @ResponseStatus(code = HttpStatus.OK, reason = "All candidates have been deleted.")
+    public void deleteAll() {
+        this.candidateRepository.deleteAll();
+    }
+
 }
