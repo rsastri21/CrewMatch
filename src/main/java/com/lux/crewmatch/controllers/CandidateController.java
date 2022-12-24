@@ -50,9 +50,14 @@ public class CandidateController {
 
     // Get candidates by search
     @GetMapping("/search")
-    public List<Candidate> searchCandidates(@RequestParam(name = "assigned", required = false) Boolean assigned) {
+    public List<Candidate> searchCandidates(
+            @RequestParam(name = "assigned", required = false) Boolean assigned,
+            @RequestParam(name = "actingInterest", required = false) Boolean actingInterest) {
         if (assigned != null && !assigned) {
             return this.candidateRepository.findByAssignedFalse();
+        }
+        if (actingInterest != null && actingInterest) {
+            return this.candidateRepository.findByActingInterestTrue();
         }
         return new ArrayList<>();
     }
