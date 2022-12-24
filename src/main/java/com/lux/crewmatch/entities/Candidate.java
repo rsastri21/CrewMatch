@@ -52,20 +52,6 @@ public class Candidate {
     @Column(name = "ASSIGNED")
     private Boolean assigned;
 
-    public Candidate(Integer id, String name, String pronouns, String email, String timestamp, Integer yearsInUW, Integer quartersInLux, List<String> productions, List<String> roles, Boolean prodPriority, Boolean assigned) {
-        this.id = id;
-        this.name = name;
-        this.pronouns = pronouns;
-        this.email = email;
-        this.timestamp = timestamp;
-        this.yearsInUW = yearsInUW;
-        this.quartersInLux = quartersInLux;
-        this.productions = productions;
-        this.roles = roles;
-        this.prodPriority = prodPriority;
-        this.assigned = assigned;
-    }
-
     public Candidate() {
 
     }
