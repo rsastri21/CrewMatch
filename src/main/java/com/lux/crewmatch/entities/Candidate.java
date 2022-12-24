@@ -30,6 +30,9 @@ public class Candidate {
     @Column(name = "QUARTERS_IN_LUX")
     private Integer quartersInLux;
 
+    @Column(name = "ACTING_INTEREST")
+    private Boolean actingInterest;
+
     @ElementCollection
     @CollectionTable(
             name = "CANDIDATE_PRODUCTIONS",
@@ -111,6 +114,14 @@ public class Candidate {
 
     public void setQuartersInLux(Integer quartersInLux) {
         this.quartersInLux = quartersInLux;
+    }
+
+    public Boolean getActingInterest() {
+        return actingInterest;
+    }
+
+    public void setActingInterest(Boolean actingInterest) {
+        this.actingInterest = actingInterest;
     }
 
     public List<String> getProductions() {

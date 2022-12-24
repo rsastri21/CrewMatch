@@ -29,7 +29,9 @@ public class CSVHelper {
             "First choice in role:",
             "Second choice in role:",
             "Third choice in role:",
-            "Would you rather have your preferred ROLE or your preferred PRODUCTION?"
+            "Would you rather have your preferred ROLE or your preferred PRODUCTION?",
+            "Are you interested in acting (and not being on a production crew)?",
+            "Which productions would you like to audition for?"
 
     };
 
@@ -62,13 +64,21 @@ public class CSVHelper {
                 candidate.setTimestamp(csvRecord.get(HEADERS[0]));
                 candidate.setYearsInUW(Integer.parseInt(csvRecord.get(HEADERS[3])));
                 candidate.setQuartersInLux(Integer.parseInt(csvRecord.get(HEADERS[4])));
-                candidate.setProductions(new ArrayList<>(Arrays.asList(csvRecord.get(HEADERS[5]),
-                                                            csvRecord.get(HEADERS[6]),
-                                                            csvRecord.get(HEADERS[7]))));
-                candidate.setRoles(new ArrayList<>(Arrays.asList(csvRecord.get(HEADERS[8]),
-                                                    csvRecord.get(HEADERS[9]),
-                                                    csvRecord.get(HEADERS[10]))));
-                candidate.setProdPriority(csvRecord.get(HEADERS[11]).equals("Production"));
+                // Logic for a candidate indicating a preference for acting
+                if (csvRecord.get(HEADERS[12]).equals("Yes")) {
+                    candidate.setActingInterest(true);
+                    List<String> actingProductions = new ArrayList<>(Arrays.asList(csvRecord.get(HEADERS[13]).split(",")));
+                    candidate.setProductions(actingProductions);
+                } else {
+                    candidate.setActingInterest(false);
+                    candidate.setProductions(new ArrayList<>(Arrays.asList(csvRecord.get(HEADERS[5]),
+                            csvRecord.get(HEADERS[6]),
+                            csvRecord.get(HEADERS[7]))));
+                    candidate.setRoles(new ArrayList<>(Arrays.asList(csvRecord.get(HEADERS[8]),
+                            csvRecord.get(HEADERS[9]),
+                            csvRecord.get(HEADERS[10]))));
+                    candidate.setProdPriority(csvRecord.get(HEADERS[11]).equals("Production"));
+                }
                 candidate.setAssigned(false);
 
                 // Add the candidate to the list
