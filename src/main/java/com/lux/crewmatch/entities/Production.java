@@ -36,6 +36,20 @@ public class Production {
 
     }
 
+    // Place a candidate on the production
+    // Returns true if the placement attempt was successful
+    public boolean place(Candidate candidate, String intendedRole) {
+        // Attempt to place based on the roles
+        for (int i = 0; i < this.roles.size(); i++) {
+            if (intendedRole.equals(roles.get(i)) && members.get(i).equals("")) {
+                // Add candidate
+                members.set(i, candidate.getName());
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Getters and Setters
     public Integer getId() {
         return id;
@@ -51,22 +65,6 @@ public class Production {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<String> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
-    }
-
-    public List<String> getMembers() {
-        return members;
-    }
-
-    public void setMembers(List<String> members) {
-        this.members = members;
     }
 
 }
