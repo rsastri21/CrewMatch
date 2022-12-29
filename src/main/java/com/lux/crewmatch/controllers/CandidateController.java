@@ -48,6 +48,31 @@ public class CandidateController {
         return candidate.get();
     }
 
+    // Get statistics on how many candidates are assigned
+    // Returns a percentage of candidates that are assigned to a production
+    @GetMapping("/get/percentAssigned")
+    public ResponseEntity<Double> getPercentAssigned() {
+        List<Candidate> assignedCandidates = this.candidateRepository.findByAssignedTrue();
+        int numAssigned = assignedCandidates.size();
+
+        int numCandidates = (int) this.candidateRepository.count();
+
+        double percent = (double) Math.round((double) 100 * numAssigned / numCandidates * 100) / 100;
+        return ResponseEntity.status(HttpStatus.OK).body(percent);
+    }
+
+    // Get statistics on how many candidates are interested in acting
+    @GetMapping("/get/percentActing")
+    public ResponseEntity<Double> getPercentActing() {
+        List<Candidate> actingCandidates = this.candidateRepository.findByActingInterestTrue();
+        int numActing = actingCandidates.size();
+
+        int numCandidates = (int) this.candidateRepository.count();
+
+        double percent = (double) Math.round((double) 100 * numActing / numCandidates * 100) / 100;
+        return ResponseEntity.status(HttpStatus.OK).body(percent);
+    }
+
     // Get candidates by search
     @GetMapping("/search")
     public List<Candidate> searchCandidates(
@@ -121,6 +146,9 @@ public class CandidateController {
         }
         if (c.getQuartersInLux() != null) {
             candidateToUpdate.setQuartersInLux(c.getQuartersInLux());
+        }
+        if (c.getActingInterest() != null) {
+            candidateToUpdate.setActingInterest(c.getActingInterest());
         }
         if (c.getProductions() != null) {
             candidateToUpdate.setProductions(c.getProductions());
