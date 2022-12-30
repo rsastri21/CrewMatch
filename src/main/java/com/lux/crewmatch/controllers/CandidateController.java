@@ -96,7 +96,16 @@ public class CandidateController {
     // Create a new candidate
     @PostMapping("/add")
     public Candidate createNewCandidate(@RequestBody Candidate candidate) {
-        return this.candidateRepository.save(candidate);
+        // First see if candidate exists already
+        Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(candidate.getName()));
+
+        if (candidateOptional.isPresent()) {
+            Candidate candidateToUpdate = candidateOptional.get();
+            CSVService.updateCandidate(candidate, candidateToUpdate);
+            return this.candidateRepository.save(candidateToUpdate);
+        } else {
+            return this.candidateRepository.save(candidate);
+        }
     }
 
     // Create new candidates from CSV
