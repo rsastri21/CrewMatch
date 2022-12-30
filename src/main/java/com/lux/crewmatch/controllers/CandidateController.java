@@ -37,7 +37,7 @@ public class CandidateController {
     }
 
     // Get number of candidates
-    @GetMapping("/getNumber")
+    @GetMapping("/getCount")
     public ResponseEntity<Integer> getNumberOfCandidates() {
         return ResponseEntity.status(HttpStatus.OK).body((int) this.candidateRepository.count());
     }
@@ -112,6 +112,7 @@ public class CandidateController {
                 return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
             } catch (Exception e) {
                 message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+                System.out.println(e.getMessage());
                 return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
             }
         }
@@ -124,7 +125,7 @@ public class CandidateController {
 
     // Update a candidate
     @PutMapping("/update/{id}")
-    public Candidate updateCandidate(@PathVariable("id") Integer id, @RequestBody Candidate c) {
+    public Candidate updateCandidateById(@PathVariable("id") Integer id, @RequestBody Candidate c) {
         // Get the candidate from the repository.
         Optional<Candidate> candidateToUpdateOptional = this.candidateRepository.findById(id);
 
@@ -138,36 +139,7 @@ public class CandidateController {
         if (c.getName() != null) {
             candidateToUpdate.setName(c.getName());
         }
-        if (c.getPronouns() != null) {
-            candidateToUpdate.setPronouns(c.getPronouns());
-        }
-        if (c.getEmail() != null) {
-            candidateToUpdate.setEmail(c.getEmail());
-        }
-        if (c.getTimestamp() != null) {
-            candidateToUpdate.setTimestamp(c.getTimestamp());
-        }
-        if (c.getYearsInUW() != null) {
-            candidateToUpdate.setYearsInUW(c.getYearsInUW());
-        }
-        if (c.getQuartersInLux() != null) {
-            candidateToUpdate.setQuartersInLux(c.getQuartersInLux());
-        }
-        if (c.getActingInterest() != null) {
-            candidateToUpdate.setActingInterest(c.getActingInterest());
-        }
-        if (c.getProductions() != null) {
-            candidateToUpdate.setProductions(c.getProductions());
-        }
-        if (c.getRoles() != null) {
-            candidateToUpdate.setRoles(c.getRoles());
-        }
-        if (c.getProdPriority() != null) {
-            candidateToUpdate.setProdPriority(c.getProdPriority());
-        }
-        if (c.getAssigned() != null) {
-            candidateToUpdate.setAssigned(c.getAssigned());
-        }
+        CSVService.updateCandidate(c, candidateToUpdate);
 
         return this.candidateRepository.save(candidateToUpdate);
 
