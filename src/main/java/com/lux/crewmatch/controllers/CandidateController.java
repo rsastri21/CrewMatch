@@ -175,7 +175,8 @@ public class CandidateController {
 
     // Delete a candidate
     @DeleteMapping("/delete/{id}")
-    public Candidate deleteCandidate(@PathVariable("id") Integer id) {
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteCandidate(@PathVariable("id") Integer id) {
         Optional<Candidate> candidateToDeleteOptional = this.candidateRepository.findById(id);
 
         if (candidateToDeleteOptional.isEmpty()) {
@@ -184,7 +185,6 @@ public class CandidateController {
 
         Candidate candidateToDelete = candidateToDeleteOptional.get();
         this.candidateRepository.delete(candidateToDelete);
-        return candidateToDelete;
     }
 
     // Delete all candidates

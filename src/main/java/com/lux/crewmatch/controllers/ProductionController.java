@@ -49,8 +49,8 @@ public class ProductionController {
         List<String> crew = production.getMembers();
         for (String member : crew) {
             // See if candidate exists, create an entry if not
-            List<Candidate> candidates = this.candidateRepository.findByName(member);
-            if (candidates.isEmpty()) {
+            Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
+            if (candidateOptional.isEmpty()) {
                 Candidate candidateToAdd = new Candidate();
                 candidateToAdd.setName(member);
                 candidateToAdd.setAssigned(true);
@@ -58,10 +58,9 @@ public class ProductionController {
                 this.candidateRepository.save(candidateToAdd);
             } else {
                 // If the candidate already exists, set assigned property to true
-                for (Candidate candidateToUpdate : candidates) {
-                    candidateToUpdate.setAssigned(true);
-                    this.candidateRepository.save(candidateToUpdate);
-                }
+                Candidate candidateToUpdate = candidateOptional.get();
+                candidateToUpdate.setAssigned(true);
+                this.candidateRepository.save(candidateToUpdate);
             }
         }
 
@@ -95,7 +94,8 @@ public class ProductionController {
 
     // Delete a production
     @DeleteMapping("/delete/{id}")
-    public Production deleteProduction(@PathVariable("id") Integer id) {
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteProduction(@PathVariable("id") Integer id) {
         Optional<Production> productionToDeleteOptional = this.productionRepository.findById(id);
 
         if (productionToDeleteOptional.isEmpty()) {
@@ -104,7 +104,6 @@ public class ProductionController {
         Production productionToDelete = productionToDeleteOptional.get();
 
         this.productionRepository.delete(productionToDelete);
-        return productionToDelete;
     }
 
 
