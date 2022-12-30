@@ -94,7 +94,7 @@ public class ProductionController {
 
     // Delete a production
     @DeleteMapping("/delete/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(code = HttpStatus.OK, reason = "The production has been deleted.")
     public void deleteProduction(@PathVariable("id") Integer id) {
         Optional<Production> productionToDeleteOptional = this.productionRepository.findById(id);
 
@@ -104,6 +104,14 @@ public class ProductionController {
         Production productionToDelete = productionToDeleteOptional.get();
 
         this.productionRepository.delete(productionToDelete);
+    }
+
+    // Delete all productions
+    // For internal use only -- Only publish API endpoint if behind two-step verification
+    @DeleteMapping("/deleteAll")
+    @ResponseStatus(code = HttpStatus.OK, reason = "All productions have been deleted.")
+    public void deleteAllProductions() {
+        this.productionRepository.deleteAll();
     }
 
 
