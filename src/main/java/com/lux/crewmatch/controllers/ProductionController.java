@@ -49,12 +49,19 @@ public class ProductionController {
         List<String> crew = production.getMembers();
         for (String member : crew) {
             // See if candidate exists, create an entry if not
-            List<Candidate> candidate = this.candidateRepository.findByName(member);
-            if (candidate.isEmpty()) {
+            List<Candidate> candidates = this.candidateRepository.findByName(member);
+            if (candidates.isEmpty()) {
                 Candidate candidateToAdd = new Candidate();
                 candidateToAdd.setName(member);
+                candidateToAdd.setAssigned(true);
 
                 this.candidateRepository.save(candidateToAdd);
+            } else {
+                // If the candidate already exists, set assigned property to true
+                for (Candidate candidateToUpdate : candidates) {
+                    candidateToUpdate.setAssigned(true);
+                    this.candidateRepository.save(candidateToUpdate);
+                }
             }
         }
 

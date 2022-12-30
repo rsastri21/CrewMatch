@@ -36,6 +36,12 @@ public class CandidateController {
         return this.candidateRepository.findAll();
     }
 
+    // Get number of candidates
+    @GetMapping("/getNumber")
+    public ResponseEntity<Integer> getNumberOfCandidates() {
+        return ResponseEntity.status(HttpStatus.OK).body((int) this.candidateRepository.count());
+    }
+
     // Get a candidate by ID
     @GetMapping("/get/{id}")
     public Candidate getCandidateById(@PathVariable("id") Integer id) {
@@ -78,8 +84,8 @@ public class CandidateController {
     public List<Candidate> searchCandidates(
             @RequestParam(name = "assigned", required = false) Boolean assigned,
             @RequestParam(name = "actingInterest", required = false) Boolean actingInterest) {
-        if (assigned != null && !assigned) {
-            return this.candidateRepository.findByAssignedFalse();
+        if (assigned != null) {
+            return assigned ? this.candidateRepository.findByAssignedTrue() : this.candidateRepository.findByAssignedFalse();
         }
         if (actingInterest != null && actingInterest) {
             return this.candidateRepository.findByActingInterestTrue();
