@@ -42,8 +42,13 @@ public class Production {
         // Attempt to place based on the roles
         for (int i = 0; i < this.roles.size(); i++) {
             if (intendedRole.equals(roles.get(i)) && members.get(i).equals("")) {
+                // String to store including pronouns
+                String name = candidate.getName();
+                if (candidate.getPronouns() != null) {
+                    name = name + " (" + candidate.getPronouns() + ")";
+                }
                 // Add candidate
-                members.set(i, candidate.getName());
+                members.set(i, name);
                 return true;
             }
         }
@@ -67,4 +72,19 @@ public class Production {
         this.name = name;
     }
 
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
+    }
+
+    public List<String> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<String> members) {
+        this.members = members;
+    }
 }

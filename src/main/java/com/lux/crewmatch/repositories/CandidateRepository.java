@@ -9,4 +9,5 @@ public interface CandidateRepository extends CrudRepository<Candidate, Integer> 
     List<Candidate> findByAssignedFalse();
     List<Candidate> findByAssignedTrue();
     List<Candidate> findByActingInterestTrue();
+    List<Candidate> findByName(String name);
 }
