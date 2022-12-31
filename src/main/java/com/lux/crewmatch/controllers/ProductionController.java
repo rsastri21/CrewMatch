@@ -56,7 +56,11 @@ public class ProductionController {
 
     // Create a new production
     @PostMapping("/create")
-    public Production createNewProduction(@RequestBody Production production) {
+    public ResponseEntity<Production> createNewProduction(@RequestBody Production production) {
+        // See if provided lists are the same length
+        if (production.getMembers().size() != production.getRoles().size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Roles and Members lists must be the same length.");
+        }
         // Prior to saving, check if members in the production are not created candidates yet
         List<String> crew = production.getMembers();
         for (String member : crew) {
@@ -76,7 +80,7 @@ public class ProductionController {
             }
         }
 
-        return this.productionRepository.save(production);
+        return ResponseEntity.status(HttpStatus.OK).body(this.productionRepository.save(production));
     }
 
     // Update a production
