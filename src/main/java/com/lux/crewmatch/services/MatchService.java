@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.PriorityQueue;
@@ -27,7 +28,7 @@ public class MatchService {
     // Returns an http response stating how many candidates were matched
     public ResponseEntity<String> match() {
         // Only assigning unassigned candidates
-        List<Candidate> candidateList = candidateRepository.findByAssignedFalse();
+        List<Candidate> candidateList = candidateRepository.findByAssignedFalseAndActingInterestFalse();
         int numCandidatesAssigned = 0;
         int numProductions;
 
@@ -50,7 +51,7 @@ public class MatchService {
 
             if (candidate.getProdPriority()) {
                 // True when candidate prefers to be placed on desired production over role.
-                for (String production : candidate.getProductions()) {
+                for (String production : new ArrayList<>(candidate.getProductions())) {
                     // Exit loop if candidate becomes assigned
                     if (candidate.getAssigned()) {
                         break;
@@ -63,7 +64,7 @@ public class MatchService {
 
                     // Try to place a candidate on a production with any roles.
                     Production productionToTry = productionOptional.get();
-                    for (String role : candidate.getRoles()) {
+                    for (String role : new ArrayList<>(candidate.getRoles())) {
                         if (productionToTry.place(candidate, role)) {
                             numCandidatesAssigned++;
                             candidate.setAssigned(true);
@@ -76,13 +77,13 @@ public class MatchService {
 
             } else {
                 // Branch where candidate prefers roles to productions.
-                for (String role : candidate.getRoles()) {
+                for (String role : new ArrayList<>(candidate.getRoles())) {
                     // Exit loop if candidate becomes assigned
                     if (candidate.getAssigned()) {
                         break;
                     }
 
-                    for (String production : candidate.getProductions()) {
+                    for (String production : new ArrayList<>(candidate.getProductions())) {
                         Optional<Production> productionOptional = Optional.ofNullable(productionRepository.findByName(production));
                         if (productionOptional.isEmpty()) {
                             continue;
