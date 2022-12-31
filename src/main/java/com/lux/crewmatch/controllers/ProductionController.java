@@ -4,6 +4,8 @@ import com.lux.crewmatch.entities.Candidate;
 import com.lux.crewmatch.repositories.CandidateRepository;
 import com.lux.crewmatch.repositories.ProductionRepository;
 import com.lux.crewmatch.entities.Production;
+import com.lux.crewmatch.services.MatchService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,6 +19,9 @@ public class ProductionController {
 
     private final ProductionRepository productionRepository;
     private final CandidateRepository candidateRepository;
+
+    @Autowired
+    MatchService matchService;
 
     // Dependency Injection
     public ProductionController(ProductionRepository productionRepository, CandidateRepository candidateRepository) {

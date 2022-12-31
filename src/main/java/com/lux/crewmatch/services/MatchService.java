@@ -67,6 +67,8 @@ public class MatchService {
                         if (productionToTry.place(candidate, role)) {
                             numCandidatesAssigned++;
                             candidate.setAssigned(true);
+                            productionRepository.save(productionToTry);
+                            candidateRepository.save(candidate);
                             break;
                         }
                     }
@@ -91,6 +93,8 @@ public class MatchService {
                         if (productionToTry.place(candidate, role)) {
                             numCandidatesAssigned++;
                             candidate.setAssigned(true);
+                            productionRepository.save(productionToTry);
+                            candidateRepository.save(candidate);
                             break;
                         }
                     }
