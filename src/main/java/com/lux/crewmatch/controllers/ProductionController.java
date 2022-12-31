@@ -7,6 +7,7 @@ import com.lux.crewmatch.entities.Production;
 import com.lux.crewmatch.services.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -45,6 +46,12 @@ public class ProductionController {
         }
 
         return productionOptional.get();
+    }
+
+    // Match crew to productions
+    @GetMapping("/match")
+    public ResponseEntity<String> matchCandidatesToProductions() {
+        return matchService.match();
     }
 
     // Create a new production
