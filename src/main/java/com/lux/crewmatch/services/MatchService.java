@@ -23,7 +23,7 @@ public class MatchService {
 
     @Autowired
     ProductionRepository productionRepository;
-
+    
     // Method to match candidates to productions
     // Returns an http response stating how many candidates were matched
     public ResponseEntity<String> match() {
@@ -34,12 +34,8 @@ public class MatchService {
 
         // Input processing:
         // - If there are no candidates or no productions, the matching algorithm should not commence.
-        if (candidateList.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("There are no candidates to match.");
-        }
-        if ((int) this.productionRepository.count() == 0) {
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("No productions have been created.");
-        }
+        ResponseEntity<String> EXPECTATION_FAILED = getStringResponseEntity(candidateList);
+        if (EXPECTATION_FAILED != null) return EXPECTATION_FAILED;
         numProductions = (int) this.productionRepository.count();
 
         PriorityQueue<Candidate> orderedCandidates = new PriorityQueue<>(new CandidateComparator());
@@ -107,6 +103,17 @@ public class MatchService {
                 numCandidatesAssigned + " have been placed on " + numProductions + " productions."
         );
 
+    }
+
+    // Helper method that determines if there are candidate and productions to be matched.
+    private ResponseEntity<String> getStringResponseEntity(List<Candidate> candidateList) {
+        if (candidateList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("There are no candidates to match.");
+        }
+        if ((int) this.productionRepository.count() == 0) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("No productions have been created.");
+        }
+        return null;
     }
 
 }
