@@ -54,6 +54,12 @@ public class ProductionController {
         return matchService.match();
     }
 
+    // Match crew to productions without absolute preference considerations
+    @GetMapping("/matchNoPreference")
+    public ResponseEntity<String> matchCandidatesToProductionsNoPreferences() {
+        return matchService.matchWithoutPreference();
+    }
+
     // Create a new production
     @PostMapping("/create")
     public ResponseEntity<Production> createNewProduction(@RequestBody Production production) {
