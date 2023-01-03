@@ -171,14 +171,8 @@ public class MatchService {
                 break;
             }
 
-            List<String> prodsToUse;
-
-            // Obtain the names of all available productions
-            if (useRepoProds) {
-                prodsToUse = obtainAllProductionNames();
-            } else {
-                prodsToUse = productions;
-            }
+            // Use appropriate productions names
+            List<String> prodsToUse = useRepoProds ? obtainAllProductionNames() : productions;
 
             for (String production : prodsToUse) {
                 Optional<Production> productionOptional = Optional.ofNullable(productionRepository.findByName(production));
