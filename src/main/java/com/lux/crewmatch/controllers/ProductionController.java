@@ -60,6 +60,17 @@ public class ProductionController {
         return matchService.matchWithoutPreference();
     }
 
+    // Search for a production by name
+    @GetMapping("/search")
+    public Production searchProductionsByName(@RequestParam(name = "name") String name) {
+        Optional<Production> productionOptional = Optional.ofNullable(this.productionRepository.findByName(name));
+        if (productionOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no production matching that name.");
+        }
+
+        return productionOptional.get();
+    }
+
     // Create a new production
     @PostMapping("/create")
     public ResponseEntity<Production> createNewProduction(@RequestBody Production production) {
