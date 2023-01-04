@@ -84,6 +84,18 @@ public class CandidateController {
     public List<Candidate> searchCandidates(
             @RequestParam(name = "assigned", required = false) Boolean assigned,
             @RequestParam(name = "actingInterest", required = false) Boolean actingInterest) {
+        if (assigned != null && actingInterest != null) {
+            if (!assigned && !actingInterest) {
+                return this.candidateRepository.findByAssignedFalseAndActingInterestFalse();
+            }
+            if (assigned && !actingInterest) {
+                return this.candidateRepository.findByAssignedTrueAndActingInterestFalse();
+            }
+            if (!assigned) {
+                return this.candidateRepository.findByAssignedFalseAndActingInterestTrue();
+            }
+            return this.candidateRepository.findByAssignedTrueAndActingInterestTrue();
+        }
         if (assigned != null) {
             return assigned ? this.candidateRepository.findByAssignedTrue() : this.candidateRepository.findByAssignedFalse();
         }
