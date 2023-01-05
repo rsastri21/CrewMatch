@@ -26,7 +26,7 @@ public class CandidateController {
     CSVService fileService;
 
     /**
-     * Creates an instance of the Candidate Controller to be used in the application.
+     * Creates an instance of the Candidate Controller to handle requests handling candidates.
      * The purpose of this constructor is to configure the proper dependency injection for Spring Boot.
      * @param candidateRepository - The CandidateRepository injected into the controller instance for repository functions.
      */
@@ -224,6 +224,7 @@ public class CandidateController {
     /**
      * Deletes a candidate according to a specified ID. Throws a bad request exception if there is no candidate matching
      * the ID provided.
+     * Accepts HTTP DELETE requests at the "./delete/{id}" API endpoint.
      * @param id - An integer identifying a candidate that is to be deleted.
      * If the deletion is successful, an OK response is returned with a message stating the candidate was deleted.
      */
@@ -243,6 +244,7 @@ public class CandidateController {
     /**
      * Deletes all the candidates in the repository. A successful deletion returns a response code of OK and a message
      * indicating that all candidates have been deleted.
+     * Accepts HTTP DELETE requests at the "./deleteAll" API endpoint.
      */
     @DeleteMapping("/deleteAll")
     @ResponseStatus(code = HttpStatus.OK, reason = "All candidates have been deleted.")
