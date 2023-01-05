@@ -25,24 +25,42 @@ public class CandidateController {
     @Autowired
     CSVService fileService;
 
-    // Dependency Injection
+    /**
+     * Creates an instance of the Candidate Controller to be used in the application.
+     * The purpose of this constructor is to configure the proper dependency injection for Spring Boot.
+     * @param candidateRepository - The CandidateRepository injected into the controller instance for repository functions.
+     */
     public CandidateController(CandidateRepository candidateRepository) {
         this.candidateRepository = candidateRepository;
     }
 
-    // Get all candidates
+    /**
+     * Gets all candidates currently stored in the repository at the "./get" API endpoint.
+     * Accepts HTTP GET requests.
+     * @return - Returns an iterable containing all the candidates.
+     */
     @GetMapping("/get")
     public Iterable<Candidate> getAllCandidates() {
         return this.candidateRepository.findAll();
     }
 
-    // Get number of candidates
+    /**
+     * Gets the number of candidates currently stored in the repository at the "./getCount" API endpoint.
+     * Accepts HTTP GET requests.
+     * @return - Returns a ResponseEntity with an OK status code. The body of the response
+     * contains the integer count of candidates.
+     */
     @GetMapping("/getCount")
     public ResponseEntity<Integer> getNumberOfCandidates() {
         return ResponseEntity.status(HttpStatus.OK).body((int) this.candidateRepository.count());
     }
 
-    // Get a candidate by ID
+    /**
+     * Gets the candidate corresponding to a particular id from the repository at the "./get/{id}" API endpoint.
+     * Accepts HTTP GET requests.
+     * @param id - Accepts an integer as a path variable to specify the candidate to be returned.
+     * @return - Returns the appropriate candidate entity.
+     */
     @GetMapping("/get/{id}")
     public Candidate getCandidateById(@PathVariable("id") Integer id) {
         Optional<Candidate> candidate = this.candidateRepository.findById(id);
@@ -54,8 +72,13 @@ public class CandidateController {
         return candidate.get();
     }
 
-    // Get statistics on how many candidates are assigned
-    // Returns a percentage of candidates that are assigned to a production
+    /**
+     * Gets statistics on the percentage of candidates that are assigned to a production at the "./get/percentAssigned"
+     * API endpoint.
+     * Accepts HTTP GET requests.
+     * @return - Returns a ResponseEntity with an OK status code with the body containing the percentage. The percentage
+     * is formatted as "XX.xx" between 0 and 100 and not expressed as a decimal.
+     */
     @GetMapping("/get/percentAssigned")
     public ResponseEntity<Double> getPercentAssigned() {
         List<Candidate> assignedCandidates = this.candidateRepository.findByAssignedTrue();
@@ -67,7 +90,12 @@ public class CandidateController {
         return ResponseEntity.status(HttpStatus.OK).body(percent);
     }
 
-    // Get statistics on how many candidates are interested in acting
+    /**
+     * Gets statistics on the percentage of candidates interested in acting at the "./get/percentActing" API endpoint.
+     * Accepts HTTP GET requests.
+     * @return - Returns a ResponseEntity with an OK status code with the body containing the percentage. The percentage
+     * is formatted as "XX.xx" between 0 and 100 and not expressed as a decimal.
+     */
     @GetMapping("/get/percentActing")
     public ResponseEntity<Double> getPercentActing() {
         List<Candidate> actingCandidates = this.candidateRepository.findByActingInterestTrue();
@@ -79,7 +107,13 @@ public class CandidateController {
         return ResponseEntity.status(HttpStatus.OK).body(percent);
     }
 
-    // Get candidates by search
+    /**
+     * Gets candidates by specified search parameters. The parameters are included in the HTTP request as query parameters.
+     * Accepts HTTP GET requests at the "./search" API endpoint.
+     * @param assigned - A boolean specifying whether a candidate is assigned to a production.
+     * @param actingInterest - A boolean specifying whether a candidate is interested in acting.
+     * @return - Returns a list of candidates matching the search criteria.
+     */
     @GetMapping("/search")
     public List<Candidate> searchCandidates(
             @RequestParam(name = "assigned", required = false) Boolean assigned,
@@ -105,7 +139,14 @@ public class CandidateController {
         return new ArrayList<>();
     }
 
-    // Create a new candidate
+    /**
+     * Creates a new candidate with the specified characteristics included in the request body.
+     * Checks to see if the candidate has already been created. If so, the candidate is updated with the provided parameters
+     * instead of creating a new instance.
+     * Accepts HTTP POST requests at the "./add" API endpoint.
+     * @param candidate - A serialized instance of the candidate entity that is to be added to the repository.
+     * @return - Returns the instance of the candidate that is saved in the repository.
+     */
     @PostMapping("/add")
     public Candidate createNewCandidate(@RequestBody Candidate candidate) {
         // First see if candidate exists already
@@ -120,7 +161,14 @@ public class CandidateController {
         }
     }
 
-    // Create new candidates from CSV
+    /**
+     * Creates candidates in bulk as read off from a CSV file.
+     * Accepts HTTP POST requests at the "./upload" API endpoint.
+     * @param file - A CSV file that is intended to be the results of a LUX Role Interest Form.
+     * @return - Returns a ResponseEntity with a message outlining the success of the file upload.
+     * If the file uploaded is not a CSV file, a BAD_REQUEST is returned. Input processing is carried out to avoid
+     * accidental or incorrect uploads possibly corrupting other data.
+     */
     @PostMapping("/upload")
     public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file) {
         String message = "";
@@ -144,7 +192,14 @@ public class CandidateController {
     }
 
 
-    // Update a candidate
+    /**
+     * Updates a candidate according to parameters specified in the request body. A bad request exception is thrown if
+     * there is no candidate matching the inputted ID.
+     * Accepts HTTP PUT requests at the "./update/{id}" API endpoint.
+     * @param id - An integer identifying a candidate to update that is provided as a path variable.
+     * @param c - The candidate body with parameters that are to be updated in the existing instance.
+     * @return - Returns the updated instance that is now saved in the repository.
+     */
     @PutMapping("/update/{id}")
     public Candidate updateCandidateById(@PathVariable("id") Integer id, @RequestBody Candidate c) {
         // Get the candidate from the repository.
@@ -166,7 +221,12 @@ public class CandidateController {
 
     }
 
-    // Delete a candidate
+    /**
+     * Deletes a candidate according to a specified ID. Throws a bad request exception if there is no candidate matching
+     * the ID provided.
+     * @param id - An integer identifying a candidate that is to be deleted.
+     * If the deletion is successful, an OK response is returned with a message stating the candidate was deleted.
+     */
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(code = HttpStatus.OK, reason = "The candidate has been deleted.")
     public void deleteCandidate(@PathVariable("id") Integer id) {
@@ -180,8 +240,10 @@ public class CandidateController {
         this.candidateRepository.delete(candidateToDelete);
     }
 
-    // Delete all candidates
-    // Intended for internal use -- Publish API endpoint only if behind two-step deletion process.
+    /**
+     * Deletes all the candidates in the repository. A successful deletion returns a response code of OK and a message
+     * indicating that all candidates have been deleted.
+     */
     @DeleteMapping("/deleteAll")
     @ResponseStatus(code = HttpStatus.OK, reason = "All candidates have been deleted.")
     public void deleteAll() {
