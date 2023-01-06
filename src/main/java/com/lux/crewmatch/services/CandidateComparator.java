@@ -13,14 +13,14 @@ public class CandidateComparator implements Comparator<Candidate> {
     public int compare(Candidate o1, Candidate o2) {
         int cmp;
 
-        // First, compare according to years in UW
-        cmp = -Integer.compare(o1.getYearsInUW(), o2.getYearsInUW());
+        // First, compare according to quarters in LUX
+        cmp = -Integer.compare(o1.getQuartersInLux(), o2.getQuartersInLux());
         if (cmp != 0) {
             return cmp;
         }
 
-        // Second, compare according to quarters in LUX
-        cmp = -Integer.compare(o1.getQuartersInLux(), o2.getQuartersInLux());
+        // Second, compare according to years in UW
+        cmp = -Integer.compare(o1.getYearsInUW(), o2.getYearsInUW());
         if (cmp != 0) {
             return cmp;
         }
