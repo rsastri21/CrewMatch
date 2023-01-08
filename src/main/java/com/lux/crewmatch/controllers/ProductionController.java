@@ -48,6 +48,17 @@ public class ProductionController {
     }
 
     /**
+     * Gets the number of productions currently stored in the repository at the "./getCount" API endpoint.
+     * Accepts HTTP GET requests.
+     * @return - Returns a ResponseEntity with an OK status code. The body of the response
+     * contains the integer count of productions.
+     */
+    @GetMapping("/getCount")
+    public ResponseEntity<Integer> getNumberOfCandidates() {
+        return ResponseEntity.status(HttpStatus.OK).body((int) this.productionRepository.count());
+    }
+
+    /**
      * Gets a production by ID. Throws a bad request exception if there is not a production matching the id.
      * Accepts HTTP GET requests at the "./get/{id}" API endpoint.
      * @param id - An integer identifying the production to be retrieved entered as a path variable.
