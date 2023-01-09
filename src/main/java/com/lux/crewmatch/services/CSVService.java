@@ -2,9 +2,13 @@ package com.lux.crewmatch.services;
 
 import com.lux.crewmatch.entities.Candidate;
 import com.lux.crewmatch.repositories.CandidateRepository;
+import com.lux.crewmatch.entities.Header;
+import com.lux.crewmatch.repositories.HeaderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,9 +20,20 @@ public class CSVService {
     @Autowired
     CandidateRepository candidateRepository;
 
+    @Autowired
+    HeaderRepository headerRepository;
+
     public void save(MultipartFile file) {
         try {
-            List<Candidate> candidates = CSVHelper.csvToCandidates(file.getInputStream());
+
+            // Retrieve headers from database
+            Optional<Header> headerOptional = Optional.ofNullable(this.headerRepository.findByName("header"));
+            if (headerOptional.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The CSV headers have not been provided.");
+            }
+            Header headers = headerOptional.get();
+
+            List<Candidate> candidates = CSVHelper.csvToCandidates(file.getInputStream(), headers.getCsvHeaders().toArray(new String[0]));
 
             // Check if a candidate already exists, and if it does --> Update it
             for (Candidate c : candidates) {

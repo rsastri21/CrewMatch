@@ -17,10 +17,10 @@ public class CSVHelper {
 
     public static String TYPE = "text/csv";
 
-    private static final String[] HEADERS = {
-            "Timestamp",
-            "Email Address",
+    private static final String[] HEADERS_TEST = {
             "What is your name? (first and last)",
+            "Email Address",
+            "Timestamp",
             "How many YEARS have you been a student at UW, including this year? (for example, a sophomore would enter \"2\")",
             "How many QUARTERS have you been in LUX Film Production Club, including this one? (for example, a new LUX member would enter \"1\")",
             "First choice in production:",
@@ -48,7 +48,7 @@ public class CSVHelper {
 
     }
 
-    public static List<Candidate> csvToCandidates(InputStream inputStream) {
+    public static List<Candidate> csvToCandidates(InputStream inputStream, String[] HEADERS) {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(fileReader,
                      CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
@@ -57,32 +57,41 @@ public class CSVHelper {
             Iterable<CSVRecord> csvRecords = csvParser.getRecords();
 
             for (CSVRecord csvRecord : csvRecords) {
-                // Create a candidate with the fields from the csv
-                Candidate candidate = new Candidate();
-                candidate.setName(csvRecord.get(HEADERS[2]));
-                candidate.setEmail(csvRecord.get(HEADERS[1]));
-                candidate.setTimestamp(csvRecord.get(HEADERS[0]));
-                candidate.setYearsInUW(Integer.parseInt(csvRecord.get(HEADERS[3])));
-                candidate.setQuartersInLux(Integer.parseInt(csvRecord.get(HEADERS[4])));
-                // Logic for a candidate indicating a preference for acting
-                if (csvRecord.get(HEADERS[12]).equals("Yes")) {
-                    candidate.setActingInterest(true);
-                    List<String> actingProductions = new ArrayList<>(Arrays.asList(csvRecord.get(HEADERS[13]).split(",")));
-                    candidate.setProductions(actingProductions);
-                } else {
-                    candidate.setActingInterest(false);
-                    candidate.setProductions(new ArrayList<>(Arrays.asList(csvRecord.get(HEADERS[5]),
-                            csvRecord.get(HEADERS[6]),
-                            csvRecord.get(HEADERS[7]))));
-                    candidate.setRoles(new ArrayList<>(Arrays.asList(csvRecord.get(HEADERS[8]),
-                            csvRecord.get(HEADERS[9]),
-                            csvRecord.get(HEADERS[10]))));
-                    candidate.setProdPriority(csvRecord.get(HEADERS[11]).equals("Production"));
-                }
-                candidate.setAssigned(false);
+                try {
+                    // Create a candidate with the fields from the csv
+                    Candidate candidate = new Candidate();
+                    candidate.setName(csvRecord.get(HEADERS[0]));
+                    // Previous forms did not have this field, so it is wrapped in an if-statement.
+                    if (!HEADERS[1].equals("")) {
+                        candidate.setPronouns(csvRecord.get(HEADERS[1]));
+                    }
+                    candidate.setEmail(csvRecord.get(HEADERS[2]));
+                    candidate.setTimestamp(csvRecord.get(HEADERS[3]));
+                    candidate.setYearsInUW(Integer.parseInt(csvRecord.get(HEADERS[4])));
+                    candidate.setQuartersInLux(Integer.parseInt(csvRecord.get(HEADERS[5])));
+                    // Logic for a candidate indicating a preference for acting
+                    if (csvRecord.get(HEADERS[13]).equals("Yes")) {
+                        candidate.setActingInterest(true);
+                        List<String> actingProductions = new ArrayList<>(Arrays.asList(csvRecord.get(HEADERS[14]).split(",")));
+                        candidate.setProductions(actingProductions);
+                    } else {
+                        candidate.setActingInterest(false);
+                        candidate.setProductions(new ArrayList<>(Arrays.asList(csvRecord.get(HEADERS[6]),
+                                csvRecord.get(HEADERS[7]),
+                                csvRecord.get(HEADERS[8]))));
+                        candidate.setRoles(new ArrayList<>(Arrays.asList(csvRecord.get(HEADERS[9]),
+                                csvRecord.get(HEADERS[10]),
+                                csvRecord.get(HEADERS[11]))));
+                        candidate.setProdPriority(csvRecord.get(HEADERS[12]).equals("Production"));
+                    }
+                    candidate.setAssigned(false);
 
-                // Add the candidate to the list
-                candidates.add(candidate);
+                    // Add the candidate to the list
+                    candidates.add(candidate);
+                } catch (Exception e) {
+                    throw new RuntimeException("The csv headers do not match. Please update them before processing" +
+                            "candidates.");
+                }
             }
 
             return candidates;
