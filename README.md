@@ -56,6 +56,91 @@ Base level access point: `/api/production`
 
 ---
 
+### Header Endpoints
+
+Base level access point: `/api/headers`
+
+*All other endpoints extend from this base URL.*
+
+| URL    | Request Type | Function |
+| ------ | :----------: | -------- |
+| `/get` | **GET** | Gets the current CSV Headers |
+| `/update` | **POST** | Updates the CSV Headers or creates new headers |
+
+#### Usage 
+
+Creating and updating headers accept POST requests with a name of "header" and body containing a list of the 15 required
+headers.
+
+*Older forms that did not contain pronouns will still work.*
+
+An example request may resemble:
+
+```
+curl --location --request POST 'http://localhost:8080/api/headers/update' \
+        --header 'Content-Type: application/json' \
+        --data-raw '{
+            "name":"header",
+            "csvHeaders":[
+                "What is your name? (first and last)",
+                "",
+                "Email Address",
+                "Timestamp",
+                "How many YEARS have you been a student at UW, including this year? (for example, a sophomore would enter \"2\")",
+                "How many QUARTERS have you been in LUX Film Production Club, including this one? (for example, a new LUX member would enter \"1\")",
+                "First choice in production:",
+                "Second choice in production:",
+                "Third choice in production:",
+                "First choice in role:",
+                "Second choice in role:",
+                "Third choice in role:",
+                "Would you rather have your preferred ROLE or your preferred PRODUCTION?",
+                "Are you interested in acting (and not being on a production crew)?",
+                "Which productions would you like to audition for?"
+            ]
+}
+```
+
+It is recommended to use a software like Postman to simplify sending these requests. 
+
+#### Internal Function
+ * The database stores only one header entity.
+ * Upon receiving a request to upload a CSV, Crew Match retrieves the present headers and performs checks to identify  
+    whether the present headers are appropriate for the uploaded CSV.
+ * If the headers are not appropriate, an error will be thrown with a message asking for the headers to be updated. 
+
+#### Flow for Usage
+ * It is recommended to check and update the headers prior to each CSV file upload to avoid errors. 
+ * No internal functionality is damaged by accidentally using the wrong headers, the application will notify  
+ if updates are required.
+
+#### Required Headers 
+
+The following 15 headers are required to correctly instantiate candidate entities. The order they are entered in is *critical*.
+
+The examples below are pulled from the 22au Role Interest Survey (Aside from the pronoun field, which is new for 23wi).
+
+| Candidate Property | Example Headers | 
+|:------------------:| --------------- |
+| Name | What is your name? (first and last) |
+| Pronouns | What are your pronouns? |
+| Email Address | Email Address |
+| Timestamp | Timestamp |
+| Years in LUX | How many YEARS have you been a student at UW, including this year? <br> (for example, a sophomore would enter 2) |
+| Quarters in LUX | How many QUARTERS have you been in LUX Film Production Club, including this one? <br> (for example, a new LUX member would enter 1) |
+| First Choice in Production | First choice in production: |
+| Second Choice in Production | Second choice in production: |
+| Third Choice in Production | Third choice in production: |
+| First Choice in Role | First choice in role: |
+| Second Choice in Role | Second choice in role: |
+| Third Choice in Role | Third choice in role: |
+| Production Preference | Would you rather have your preferred ROLE or your preferred PRODUCTION? |
+| Acting Interest | Are you interested in acting (and not being on a production crew)? |
+| Productions to Audition For | Which productions would you like to audition for? |
+
+
+---
+
 ### Upcoming functionality changes
   * Ability for productions to be flagged as independent and be exempted from crew matching.
   * Roles controller to get default roles and find which roles need to be included in the Role Interest Form.
