@@ -17,24 +17,6 @@ public class CSVHelper {
 
     public static String TYPE = "text/csv";
 
-    private static final String[] HEADERS_TEST = {
-            "What is your name? (first and last)",
-            "Email Address",
-            "Timestamp",
-            "How many YEARS have you been a student at UW, including this year? (for example, a sophomore would enter \"2\")",
-            "How many QUARTERS have you been in LUX Film Production Club, including this one? (for example, a new LUX member would enter \"1\")",
-            "First choice in production:",
-            "Second choice in production:",
-            "Third choice in production:",
-            "First choice in role:",
-            "Second choice in role:",
-            "Third choice in role:",
-            "Would you rather have your preferred ROLE or your preferred PRODUCTION?",
-            "Are you interested in acting (and not being on a production crew)?",
-            "Which productions would you like to audition for?"
-
-    };
-
     /*
      *  Checks the validity of an uploaded file.
      *  Params:
@@ -90,7 +72,7 @@ public class CSVHelper {
                     candidates.add(candidate);
                 } catch (Exception e) {
                     throw new RuntimeException("The csv headers do not match. Please update them before processing" +
-                            "candidates.");
+                            " candidates.");
                 }
             }
 
