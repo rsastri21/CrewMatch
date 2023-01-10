@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/headers")
 public class HeaderController {
