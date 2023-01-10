@@ -106,7 +106,7 @@ It is recommended to use a software like Postman to simplify sending these reque
 #### Internal Function
  * The database stores only one header entity.
  * Upon receiving a request to upload a CSV, Crew Match retrieves the present headers and performs checks to identify  
-    whether the present headers are appropriate for the uploaded CSV.
+ whether the present headers are appropriate for the uploaded CSV.
  * If the headers are not appropriate, an error will be thrown with a message asking for the headers to be updated. 
 
 #### Flow for Usage
