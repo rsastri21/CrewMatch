@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.List;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/production")
 public class ProductionController {
