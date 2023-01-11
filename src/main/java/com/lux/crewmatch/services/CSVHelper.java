@@ -42,7 +42,9 @@ public class CSVHelper {
                 try {
                     // Create a candidate with the fields from the csv
                     Candidate candidate = new Candidate();
-                    candidate.setName(csvRecord.get(HEADERS[0]));
+                    if (!csvRecord.get(HEADERS[0]).equals("")) {
+                        candidate.setName(csvRecord.get(HEADERS[0]));
+                    }
                     // Previous forms did not have this field, so it is wrapped in an if-statement.
                     if (!HEADERS[1].equals("")) {
                         candidate.setPronouns(csvRecord.get(HEADERS[1]));
