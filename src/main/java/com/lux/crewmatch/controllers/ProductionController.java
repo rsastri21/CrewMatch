@@ -77,6 +77,7 @@ public class ProductionController {
      * Gets all the roles that contained within any production.
      * Intended for use prior to creating the Role Interest Form, allowing all candidates
      * to select roles that are contained within a production's needs.
+     * Accepts HTTP GET requests at the "./get/roles" API endpoint.
      * @return - Returns a list of strings containing all the roles contained on all the productions.
      */
     @GetMapping("/get/roles")
