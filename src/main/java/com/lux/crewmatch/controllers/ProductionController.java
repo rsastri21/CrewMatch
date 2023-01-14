@@ -202,6 +202,49 @@ public class ProductionController {
         return this.productionRepository.save(productionToUpdate);
     }
 
+    @PutMapping("/assign/{productionID}/{candidateID}/{roleIndex}")
+    public ResponseEntity<String> manualCandidateAssign(@PathVariable("productionID") Integer productionID,
+                                                        @PathVariable("candidateID") Integer candidateID,
+                                                        @PathVariable("roleIndex") Integer roleIndex) {
+        // Get the requested production
+        Optional<Production> productionOptional = this.productionRepository.findById(productionID);
+        if (productionOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no production with that ID.");
+        }
+        Production productionToUpdate = productionOptional.get();
+
+        // Check if the candidate is present
+        Optional<Candidate> candidateOptional = this.candidateRepository.findById(candidateID);
+        if (candidateOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no candidate with that ID.");
+        }
+        Candidate candidateToAssign = candidateOptional.get();
+
+        // Configure candidate name
+        StringBuilder candidateDisplayName = new StringBuilder();
+        candidateDisplayName.append(candidateToAssign.getName());
+        if (candidateToAssign.getPronouns() != null) {
+            candidateDisplayName.append(" (").append(candidateToAssign.getPronouns()).append(")");
+        }
+
+        // Assign the candidate to the requested role if it is empty
+        List<String> productionMembers = new ArrayList<>(productionToUpdate.getMembers());
+        if (!productionMembers.get(roleIndex).equals("")) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("The desired role is already filled");
+        }
+        productionMembers.set(roleIndex, candidateDisplayName.toString());
+
+        // Update production
+        productionToUpdate.setMembers(productionMembers);
+        this.productionRepository.save(productionToUpdate);
+
+        // Change candidate status to assigned
+        candidateToAssign.setAssigned(true);
+        this.candidateRepository.save(candidateToAssign);
+
+        return ResponseEntity.status(HttpStatus.OK).body("The candidate was assigned.");
+    }
+
     /**
      * Swaps members between two productions. Throws bad request exceptions if any of the productions or members
      * specified are not present.
