@@ -11,10 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.List;
+import java.util.*;
 
 @CrossOrigin
 @RestController
@@ -74,6 +71,25 @@ public class ProductionController {
         }
 
         return productionOptional.get();
+    }
+
+    /**
+     * Gets all the roles that contained within any production.
+     * Intended for use prior to creating the Role Interest Form, allowing all candidates
+     * to select roles that are contained within a production's needs.
+     * @return - Returns a list of strings containing all the roles contained on all the productions.
+     */
+    @GetMapping("/get/roles")
+    public List<String> getAllRoles() {
+        Iterable<Production> productions = this.productionRepository.findAll();
+
+        Set<String> roles = new HashSet<>();
+        // Iterate through every production and add unique roles
+        for (Production production : productions) {
+            roles.addAll(production.getRoles());
+        }
+
+        return roles.stream().toList();
     }
 
     /**
