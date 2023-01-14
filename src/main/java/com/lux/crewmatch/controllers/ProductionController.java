@@ -202,6 +202,16 @@ public class ProductionController {
         return this.productionRepository.save(productionToUpdate);
     }
 
+    /**
+     * Assigns a given candidate to a production in a specified role.
+     * Accepts HTTP PUT requests at the "./assign/{productionID}/{candidateID}/{roleIndex}" API Endpoint.
+     * Throws bad request or expectation failed responses if the production, candidate are not found, or if the role is
+     * already occupied.
+     * @param productionID - The ID of the production to which the candidate will be assigned. Provided as a path variable.
+     * @param candidateID - The ID of the candidate to be assigned. Provided as a path variable.
+     * @param roleIndex - The index of the desired role in the productions roles list. Provided as a path variable.
+     * @return - Returns a response entity detailing the status of the assignment.
+     */
     @PutMapping("/assign/{productionID}/{candidateID}/{roleIndex}")
     public ResponseEntity<String> manualCandidateAssign(@PathVariable("productionID") Integer productionID,
                                                         @PathVariable("candidateID") Integer candidateID,
@@ -219,6 +229,11 @@ public class ProductionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no candidate with that ID.");
         }
         Candidate candidateToAssign = candidateOptional.get();
+
+        // Check if candidate is already assigned
+        if (candidateToAssign.getAssigned()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The candidate is already assigned.");
+        }
 
         // Configure candidate name
         StringBuilder candidateDisplayName = new StringBuilder();
@@ -351,7 +366,5 @@ public class ProductionController {
     public void deleteAllProductions() {
         this.productionRepository.deleteAll();
     }
-
-
 
 }
