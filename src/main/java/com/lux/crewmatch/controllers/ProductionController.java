@@ -155,6 +155,9 @@ public class ProductionController {
             Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
             if (candidateOptional.isEmpty()) {
                 Candidate candidateToAdd = new Candidate();
+                if (candidateToAdd.getName().equals("")) {
+                    continue;
+                }
                 candidateToAdd.setName(member);
                 candidateToAdd.setAssigned(true);
 

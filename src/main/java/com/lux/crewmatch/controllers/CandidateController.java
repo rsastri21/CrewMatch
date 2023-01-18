@@ -171,7 +171,7 @@ public class CandidateController {
      * accidental or incorrect uploads possibly corrupting other data.
      */
     @PostMapping("/upload")
-    public ResponseEntity<ResponseMessage> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         String message = "";
 
         if (CSVHelper.isValidFile(file)) {
@@ -179,16 +179,16 @@ public class CandidateController {
                 fileService.save(file);
 
                 message = "Uploaded the file successfully: " + file.getOriginalFilename();
-                return ResponseEntity.status(HttpStatus.OK).body(new ResponseMessage(message));
+                return ResponseEntity.status(HttpStatus.OK).body(message);
             } catch (Exception e) {
                 message = e.getMessage();
                 System.out.println(e.getMessage());
-                return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new ResponseMessage(message));
+                return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
             }
         }
 
         message = "Please upload a CSV file.";
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseMessage(message));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
 
     }
 
