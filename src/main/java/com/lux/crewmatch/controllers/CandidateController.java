@@ -113,12 +113,22 @@ public class CandidateController {
      * Accepts HTTP GET requests at the "./search" API endpoint.
      * @param assigned - A boolean specifying whether a candidate is assigned to a production.
      * @param actingInterest - A boolean specifying whether a candidate is interested in acting.
+     * @param production - A string identifying a production that should be contained in a candidate's preferences.
      * @return - Returns a list of candidates matching the search criteria.
      */
     @GetMapping("/search")
     public List<Candidate> searchCandidates(
             @RequestParam(name = "assigned", required = false) Boolean assigned,
-            @RequestParam(name = "actingInterest", required = false) Boolean actingInterest) {
+            @RequestParam(name = "actingInterest", required = false) Boolean actingInterest,
+            @RequestParam(name = "production", required = false) String production) {
+        if (production != null && assigned != null && actingInterest != null) {
+            if (actingInterest && !assigned) {
+                return this.candidateRepository.findByAssignedFalseAndActingInterestTrueAndProductionsLike("%" + production + "%");
+            }
+            if (!actingInterest && !assigned) {
+                return this.candidateRepository.findByAssignedFalseAndActingInterestFalseAndProductionsContaining(production);
+            }
+        }
         if (assigned != null && actingInterest != null) {
             if (!assigned && !actingInterest) {
                 return this.candidateRepository.findByAssignedFalseAndActingInterestFalse();

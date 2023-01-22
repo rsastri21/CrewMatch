@@ -17,5 +17,8 @@ public interface CandidateRepository extends CrudRepository<Candidate, Integer> 
     List<Candidate> findByAssignedTrueAndActingInterestFalse();
     List<Candidate> findByAssignedFalseAndActingInterestTrue();
     List<Candidate> findByAssignedTrueAndActingInterestTrue();
+    List<Candidate> findByAssignedFalseAndProductionsContaining(String production);
+    List<Candidate> findByAssignedFalseAndActingInterestTrueAndProductionsLike(String production);
+    List<Candidate> findByAssignedFalseAndActingInterestFalseAndProductionsContaining(String production);
     Candidate findByName(String name);
 }
