@@ -14,7 +14,7 @@
     <name>CrewMatch</name>
     <description>CrewMatch</description>
     <properties>
-        <java.version>19.0.2</java.version>
+        <java.version>19</java.version>
     </properties>
     <dependencies>
         <dependency>
