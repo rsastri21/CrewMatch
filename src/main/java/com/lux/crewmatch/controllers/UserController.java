@@ -67,7 +67,7 @@ public class UserController {
     }
 
     // Log a user in
-    @GetMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody User user) {
         // Find the user
         Optional<User> userOptional = Optional.ofNullable(this.userRepository.findByUsername(user.getUsername()));

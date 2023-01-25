@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import com.lux.crewmatch.services.CSVHelper;
 
 import java.util.*;
 
@@ -152,13 +153,14 @@ public class ProductionController {
         List<String> crew = production.getMembers();
         for (String member : crew) {
             // See if candidate exists, create an entry if not
-            Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
+            String memberName = CSVHelper.formatName(member);
+            Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(memberName));
             if (candidateOptional.isEmpty()) {
                 Candidate candidateToAdd = new Candidate();
-                if (member.equals("")) {
+                if (memberName.equals("")) {
                     continue;
                 }
-                candidateToAdd.setName(member);
+                candidateToAdd.setName(memberName);
                 candidateToAdd.setAssigned(true);
 
                 this.candidateRepository.save(candidateToAdd);
@@ -169,6 +171,13 @@ public class ProductionController {
                 this.candidateRepository.save(candidateToUpdate);
             }
         }
+
+        // Capitalize all crew member names
+        List<String> crewFormatted = new ArrayList<>(crew);
+        for (int i = 0; i < crew.size(); i++) {
+            crewFormatted.set(i, CSVHelper.formatName(crew.get(i)));
+        }
+        production.setMembers(new ArrayList<>(crewFormatted));
 
         return ResponseEntity.status(HttpStatus.OK).body(this.productionRepository.save(production));
     }

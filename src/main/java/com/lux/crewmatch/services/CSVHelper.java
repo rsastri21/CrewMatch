@@ -15,6 +15,11 @@ import com.lux.crewmatch.entities.Candidate;
 
 public class CSVHelper {
 
+
+//    public static void main(String[] args) {
+//        String name = "rohan sastri";
+//        System.out.println(formatName(name));
+//    }
     public static String TYPE = "text/csv";
 
     /*
@@ -30,6 +35,30 @@ public class CSVHelper {
 
     }
 
+    /**
+     * Helper method to format names with capital first letters of each word.
+     * @param name - The name to be formatted.
+     * @return _ Returns a formatted version of the name.
+     */
+    public static String formatName(String name) {
+
+        // Input processing
+        if (name.length() == 0) {
+            return name;
+        }
+
+        String[] names = name.split(" ");
+
+        StringBuilder result = new StringBuilder();
+        // Capitalize first letter
+        for (String entry : names) {
+            String formattedName = Character.toUpperCase(entry.charAt(0)) + entry.substring(1);
+            result.append(formattedName).append(" ");
+        }
+
+        return result.toString().trim();
+    }
+
     public static List<Candidate> csvToCandidates(InputStream inputStream, String[] HEADERS) {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(fileReader,
@@ -43,7 +72,7 @@ public class CSVHelper {
                     // Create a candidate with the fields from the csv
                     Candidate candidate = new Candidate();
                     if (!csvRecord.get(HEADERS[0]).equals("")) {
-                        candidate.setName(csvRecord.get(HEADERS[0]));
+                        candidate.setName(formatName(csvRecord.get(HEADERS[0])));
                     }
                     // Previous forms did not have this field, so it is wrapped in an if-statement.
                     if (!HEADERS[1].equals("")) {
