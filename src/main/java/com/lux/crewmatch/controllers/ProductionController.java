@@ -314,7 +314,7 @@ public class ProductionController {
 
         // Swap members
         swapMembers(productionOne, member1, swapRequest.getRole1(), member2);
-        swapMembers(productionTwo, member2, swapRequest.getMember2(), member1);
+        swapMembers(productionTwo, member2, swapRequest.getRole2(), member1);
 
         return ResponseEntity.status(HttpStatus.OK).body("The members have been swapped.");
 
