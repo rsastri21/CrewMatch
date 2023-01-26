@@ -277,11 +277,7 @@ public class ProductionController {
      * Swaps members between two productions. Throws bad request exceptions if any of the productions or members
      * specified are not present.
      * Accepts HTTP PUT requests at the "./swap/..." API endpoint.
-     * @param production1 - A string identifying the first production that a member is to be swapped from.
-     *                    Provided as a path variable.
-     * @param member1 - A string identifying the first member of the swap. Provided as a path variable.
-     * @param production2 - A string identifying the second production. Provided as path variable.
-     * @param member2 - A string identifying the second member in th swap. Provided as a path variable.
+     * @param swapRequest - A request body following the parameters in the SwapRequest entity outlining the swap.
      * @return - Returns a ResponseEntity indicating whether the swap was successful.
      */
     @PutMapping("/swap")
