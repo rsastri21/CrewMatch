@@ -10,4 +10,27 @@ public class SwapRequest {
     private String member2;
     private String role2;
 
+    public String getProduction1() {
+        return production1;
+    }
+
+    public String getMember1() {
+        return member1;
+    }
+
+    public String getRole1() {
+        return role1;
+    }
+
+    public String getProduction2() {
+        return production2;
+    }
+
+    public String getMember2() {
+        return member2;
+    }
+
+    public String getRole2() {
+        return role2;
+    }
 }
