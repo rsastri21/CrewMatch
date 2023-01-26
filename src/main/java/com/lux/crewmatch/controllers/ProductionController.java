@@ -324,7 +324,7 @@ public class ProductionController {
      */
     private boolean checkMemberPresent(Production production, String memberToCheck) {
         for (String member : production.getMembers()) {
-            if (member.equals(memberToCheck)) {
+            if (member.startsWith(memberToCheck)) {
                 return true;
             }
         }
