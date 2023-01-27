@@ -11,7 +11,9 @@ The project is written in Java and built with the Spring Boot Web framework.
 
 The API contains requests categorized between two entities: *Candidates* and *Productions*.
 
-`The hosting service has not yet been determined, so API endpoints omit the URL at which they will be accessed.`
+**Update: *Headers* and *User* have been added with respective functionalities.**
+
+`Heroku is being used as the deployment service. Heroku PostgreSQL is used as the database. For security purposes, the URL of the API will not be distributed.`
 
 ---
 
@@ -46,13 +48,43 @@ Base level access point: `/api/production`
 | ------- | :----------: | -------- |
 | `/get` | **GET** | Gets all productions |
 | `/get/{id}` | **GET** | Gets a production by ID | 
+| `/get/roles` | ** GET** | Gets all the roles contained in productions. |
 | `/match` | **GET** | Matches candidates to productions according to preferences |
 | `/matchNoPreference` | **GET** | Matches candidates without strictly following preferences |
 | `/search`  | **GET** | Searches for productions by name |
 | `/create` | **POST** | Creates a new production with parameters specified in request body |
+| `/assign/{productionID}/{candidateID}/{roleIndex}` | **PUT** | Manually assigns a candidate to a particular role in a production |
 | `/update/{id}` | **PUT** | Updates a production by ID with parameters specified in request body |
-| `/swap/{production1}/{member1}/{production2}/{member2}` | **PUT** | Swaps members between two productions | 
+| `/swap` | **PUT** | Swaps members between two productions with a SwapRequest request body | 
 | `/delete/{id}` | **DELETE** | Deletes a production by ID |
+
+---
+
+### User Endpoints
+
+Base level access point: `/api/user`
+
+*All other endpoints extend from this base URL.*
+
+| URL    | Request Type | Function | 
+| ------ | :-----------:| -------- |
+| `/get` | **GET** | Gets all registered users. |
+| `/register` | **POST** | Creates a new user with default permissions with a username and password set in the request body. |
+| `/login` | **POST** | Authenticates a user and returns their permission level. |
+| `/update` | **PUT** | Updates a user's role. |
+| `/delete/{id}` | **DELETE** | Deletes a user by ID. |
+| `/deleteAll` | **DELETE** | Deletes all the registered users. | 
+
+#### Usage
+
+The user controller serves as the in-built authentication and authorization service. There are 3 tiers of permissions levels: user, production head, and admin. 
+
+When a user is registered, they are automatically configured with the base-level permissions. These permissions can be updated by someone who has admin privileges.
+
+### Some Notes on Security
+* The API is protected via CORS to restrict requests, so user data cannot be accessed from unauthorized systems.
+* Passwords are stored using the BCrypt hashing algorithm and neither the frontend nor backend store password related information in plain-text.
+* The hash used is not feasibly reversible, keeping information secure. 
 
 ---
 
@@ -143,4 +175,4 @@ The examples below are pulled from the 22au Role Interest Survey (Aside from the
 
 ### Upcoming functionality changes
   * Ability for productions to be flagged as independent and be exempted from crew matching.
-  * Roles controller to get default roles and find which roles need to be included in the Role Interest Form.
+  * ~~Roles controller to get default roles and find which roles need to be included in the Role Interest Form.~~ Implemented in ProductionsController.
