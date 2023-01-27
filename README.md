@@ -48,7 +48,7 @@ Base level access point: `/api/production`
 | ------- | :----------: | -------- |
 | `/get` | **GET** | Gets all productions |
 | `/get/{id}` | **GET** | Gets a production by ID | 
-| `/get/roles` | ** GET** | Gets all the roles contained in productions. |
+| `/get/roles` | **GET** | Gets all the roles contained in productions. |
 | `/match` | **GET** | Matches candidates to productions according to preferences |
 | `/matchNoPreference` | **GET** | Matches candidates without strictly following preferences |
 | `/search`  | **GET** | Searches for productions by name |
