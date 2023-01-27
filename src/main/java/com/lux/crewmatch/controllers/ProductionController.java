@@ -280,7 +280,7 @@ public class ProductionController {
      * @param swapRequest - A swap request with the parameters outlined in the entity model.
      * @return - Returns a ResponseEntity indicating whether the swap was successful.
      */
-    @PutMapping("/swap/{production1}/{member1}/{production2}/{member2}")
+    @PutMapping("/swap")
     public ResponseEntity<String> swapMembers(@RequestBody SwapRequest swapRequest) {
         // Find the first production
         String production1 = swapRequest.getProduction1();
