@@ -32,6 +32,9 @@ public class Production {
     @Column(name = "MEMBERS")
     private List<String> members;
 
+    @Column(name = "PRODUCTION_LEAD")
+    private String prodLead;
+
     public Production() {
 
     }
@@ -86,5 +89,13 @@ public class Production {
 
     public void setMembers(List<String> members) {
         this.members = members;
+    }
+
+    public String getProdLead() {
+        return prodLead;
+    }
+
+    public void setProdLead(String prodLead) {
+        this.prodLead = prodLead;
     }
 }

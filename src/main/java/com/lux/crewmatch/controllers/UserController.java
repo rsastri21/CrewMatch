@@ -2,7 +2,9 @@ package com.lux.crewmatch.controllers;
 
 
 import com.lux.crewmatch.entities.Candidate;
+import com.lux.crewmatch.entities.Production;
 import com.lux.crewmatch.entities.User;
+import com.lux.crewmatch.repositories.ProductionRepository;
 import com.lux.crewmatch.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +20,14 @@ import java.util.Optional;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final ProductionRepository productionRepository;
     private final BCryptPasswordEncoder encoder;
     private static final String DEFAULT_ROLE = "user";
 
     // Dependency Injection
-    public UserController(UserRepository userRepository) {
+    public UserController(UserRepository userRepository, ProductionRepository productionRepository) {
         this.userRepository = userRepository;
+        this.productionRepository = productionRepository;
         this.encoder = new BCryptPasswordEncoder(10);
     }
 
@@ -104,6 +108,40 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK).body("The user's permissions have been updated.");
 
+    }
+
+    // Assign a production to a production head, i.e. the production head now leads that production.
+    @PutMapping("/assign")
+    public ResponseEntity<String> assignProdHead(@RequestParam(name = "username") String username,
+                                                 @RequestParam(name = "production") String production) {
+        Optional<User> userOptional = Optional.ofNullable(this.userRepository.findByUsername(username));
+        if (userOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "That user does not exist.");
+        }
+        User userToAssign = userOptional.get();
+
+        // If the user that is becoming a production lead is not already a production head, update the role.
+        if (userToAssign.getRole().equals("user")) {
+            userToAssign.setRole("production head");
+        }
+
+        // Validate that the intended production exists.
+        Optional<Production> productionOptional = Optional.ofNullable(this.productionRepository.findByName(production));
+        if (productionOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "That production does not exist.");
+        }
+        Production productionToUpdate = productionOptional.get();
+
+        // Set the user as the lead of the production.
+        userToAssign.setLeads(production);
+        productionToUpdate.setProdLead(userToAssign.getUsername());
+
+        // Save updates.
+        this.userRepository.save(userToAssign);
+        this.productionRepository.save(productionToUpdate);
+
+        return ResponseEntity.status(HttpStatus.OK).body(userToAssign.getUsername() + " is now the production lead of " +
+                productionToUpdate.getName());
     }
 
     // Delete a user
