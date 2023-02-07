@@ -155,6 +155,17 @@ public class UserController {
         }
 
         User userToDelete = userToDeleteOptional.get();
+
+        // If user leads a production, remove the association.
+        if (userToDelete.getLeads() != null) {
+            Optional<Production> productionOptional = Optional.ofNullable(this.productionRepository.findByName(userToDelete.getLeads()));
+            if (productionOptional.isPresent()) {
+                Production productionToUpdate = productionOptional.get();
+                productionToUpdate.setProdLead("");
+                this.productionRepository.save(productionToUpdate);
+            }
+        }
+
         this.userRepository.delete(userToDelete);
     }
 
