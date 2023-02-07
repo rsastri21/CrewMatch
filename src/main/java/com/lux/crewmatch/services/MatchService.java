@@ -29,6 +29,7 @@ public class MatchService {
     public ResponseEntity<String> match() {
         // Only assigning unassigned candidates
         List<Candidate> candidateList = candidateRepository.findByAssignedFalseAndActingInterestFalse();
+        int totalCandidates = candidateList.size();
         int numCandidatesAssigned = 0;
         int numProductions;
 
@@ -56,7 +57,8 @@ public class MatchService {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(
-                numCandidatesAssigned + " have been placed on " + numProductions + " productions."
+                numCandidatesAssigned + " have been placed on " + numProductions + " productions. " + (totalCandidates - numCandidatesAssigned) +
+                " remain to be matched."
         );
 
     }
@@ -66,6 +68,7 @@ public class MatchService {
     public ResponseEntity<String> matchWithoutPreference() {
         // Select unassigned candidates
         List<Candidate> candidateList = this.candidateRepository.findByAssignedFalseAndActingInterestFalse();
+        int totalCandidates = candidateList.size();
         int numCandidatesAssigned = 0;
         int numProductions;
 
@@ -126,7 +129,8 @@ public class MatchService {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(
-                numCandidatesAssigned + " have been placed on " + numProductions + " productions."
+                numCandidatesAssigned + " have been placed on " + numProductions + " productions. " + (totalCandidates - numCandidatesAssigned) +
+                        " remain to be matched."
         );
 
     }
