@@ -125,10 +125,23 @@ public class UserController {
             userToAssign.setRole("production head");
         }
 
+        // If the user is already a production lead, remove the association.
+        String currentProd = userToAssign.getLeads();
+        Optional<Production> currentOptional = Optional.ofNullable(this.productionRepository.findByName(currentProd));
+        if (currentOptional.isPresent()) {
+            Production current = currentOptional.get();
+            current.setProdLead(null);
+            // Save
+            this.productionRepository.save(current);
+        }
+
         // Validate that the intended production exists.
         Optional<Production> productionOptional = Optional.ofNullable(this.productionRepository.findByName(production));
         if (productionOptional.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "That production does not exist.");
+            // If production does not exist, set leads property to empty.
+            userToAssign.setLeads("");
+            this.userRepository.save(userToAssign);
+            return ResponseEntity.status(HttpStatus.OK).body(userToAssign.getUsername() + " is no longer the lead of any production.");
         }
         Production productionToUpdate = productionOptional.get();
 
