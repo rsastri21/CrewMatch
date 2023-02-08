@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface ProductionRepository extends CrudRepository<Production, Integer> {
     Production findByName(String name);
+    List<Production> findByProdLeadIsNull();
 
 }

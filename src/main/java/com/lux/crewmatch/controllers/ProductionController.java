@@ -48,6 +48,16 @@ public class ProductionController {
     }
 
     /**
+     * Gets all productions that do not have an assigned production lead.
+     * Accepts HTTP GET requests at the "./getNoLead" API endpoint.
+     * @return - returns a list containing all the productions that match the criteria.
+     */
+    @GetMapping("/getNoLead")
+    public List<Production> getProductionsNoLead() {
+        return this.productionRepository.findByProdLeadIsNull();
+    }
+
+    /**
      * Gets the number of productions currently stored in the repository at the "./getCount" API endpoint.
      * Accepts HTTP GET requests.
      * @return - Returns a ResponseEntity with an OK status code. The body of the response
