@@ -1,9 +1,11 @@
 package com.lux.crewmatch.services;
 
 import com.lux.crewmatch.entities.Candidate;
+import com.lux.crewmatch.entities.Production;
 import com.lux.crewmatch.repositories.CandidateRepository;
 import com.lux.crewmatch.entities.Header;
 import com.lux.crewmatch.repositories.HeaderRepository;
+import com.lux.crewmatch.repositories.ProductionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +25,20 @@ public class CSVService {
     CandidateRepository candidateRepository;
 
     @Autowired
+    ProductionRepository productionRepository;
+
+    @Autowired
     HeaderRepository headerRepository;
+
+    public List<String[]> dataToCSV(Iterable<Production> productionsIterable) {
+        List<Production> productions = new ArrayList<>();
+
+        for (Production production : productionsIterable) {
+            productions.add(production);
+        }
+
+        return CSVHelper.dataToGrid(productions);
+    }
 
     public void save(MultipartFile file) {
         try {

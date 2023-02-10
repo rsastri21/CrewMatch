@@ -5,6 +5,7 @@ import com.lux.crewmatch.entities.SwapRequest;
 import com.lux.crewmatch.repositories.CandidateRepository;
 import com.lux.crewmatch.repositories.ProductionRepository;
 import com.lux.crewmatch.entities.Production;
+import com.lux.crewmatch.services.CSVService;
 import com.lux.crewmatch.services.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,9 @@ public class ProductionController {
 
     @Autowired
     MatchService matchService;
+
+    @Autowired
+    CSVService fileService;
 
     /**
      * Creates an instance of the production controller to handle requests relating to productions.
@@ -103,6 +107,12 @@ public class ProductionController {
         }
 
         return roles.stream().toList();
+    }
+
+    // TEST
+    @GetMapping("/getCSV")
+    public List<String[]> convertToCSV() {
+        return fileService.dataToCSV(this.productionRepository.findAll());
     }
 
     /**
