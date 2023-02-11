@@ -5,12 +5,16 @@ import com.lux.crewmatch.entities.SwapRequest;
 import com.lux.crewmatch.repositories.CandidateRepository;
 import com.lux.crewmatch.repositories.ProductionRepository;
 import com.lux.crewmatch.entities.Production;
+import com.lux.crewmatch.services.CSVService;
 import com.lux.crewmatch.services.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.core.io.InputStreamResource;
 import com.lux.crewmatch.services.CSVHelper;
 
 import java.util.*;
@@ -25,6 +29,9 @@ public class ProductionController {
 
     @Autowired
     MatchService matchService;
+
+    @Autowired
+    CSVService fileService;
 
     /**
      * Creates an instance of the production controller to handle requests relating to productions.
@@ -64,7 +71,7 @@ public class ProductionController {
      * contains the integer count of productions.
      */
     @GetMapping("/getCount")
-    public ResponseEntity<Integer> getNumberOfCandidates() {
+    public ResponseEntity<Integer> getNumberOfProductions() {
         return ResponseEntity.status(HttpStatus.OK).body((int) this.productionRepository.count());
     }
 
@@ -103,6 +110,37 @@ public class ProductionController {
         }
 
         return roles.stream().toList();
+    }
+
+    /**
+     * Exports the data of all production assignments to CSV format.
+     * Accepts HTTP GET requests at the "./getCSV/{filename}" API endpoint.
+     * @param filename - A string path variable describing the name of the output file.
+     * @return - Returns a CSV file with the assignment data.
+     */
+    @GetMapping("/getCSV/{filename}")
+    public ResponseEntity<Resource> convertToCSV(@PathVariable("filename") String filename) {
+        // Check that productions exist
+        if (this.productionRepository.count() == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There are no productions to display.");
+        }
+
+        InputStreamResource fileInputStream = fileService.dataToCSV(this.productionRepository.findAll());
+
+        String csvFileName = filename + ".csv";
+
+        // HTTP Headers for response
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + csvFileName);
+        // Specifying return type
+        headers.set(HttpHeaders.CONTENT_TYPE, "text/csv");
+
+        return new ResponseEntity<>(
+                fileInputStream,
+                headers,
+                HttpStatus.OK
+        );
+
     }
 
     /**

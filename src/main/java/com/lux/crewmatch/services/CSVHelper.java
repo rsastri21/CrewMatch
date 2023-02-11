@@ -4,8 +4,10 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import com.lux.crewmatch.entities.Production;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -15,11 +17,6 @@ import com.lux.crewmatch.entities.Candidate;
 
 public class CSVHelper {
 
-
-//    public static void main(String[] args) {
-//        String name = "rohan sastri";
-//        System.out.println(formatName(name));
-//    }
     public static String TYPE = "text/csv";
 
     /*
@@ -112,5 +109,60 @@ public class CSVHelper {
         } catch (IOException e) {
             throw new RuntimeException("failed to parse CSV file: " + e.getMessage());
         }
+    }
+
+    // Convert all the productions data to a 2d array which can be outputted to CSV.
+    public static List<String[]> dataToGrid(List<Production> productions) {
+        // Initialize output
+        List<String[]> output = new ArrayList<>();
+
+        // Prepare width dimension of output
+        int width = 3 * productions.size() - 1;
+
+        // Get number of rows required for each production
+        List<Integer> productionLengths = getProductionLengths(productions);
+        int maxLength = Collections.max(productionLengths);
+
+        // Beginning row containing production names
+        String[] productionNames = new String[width];
+        String[] productionHeaders = new String[width];
+        Arrays.fill(productionNames, "");
+        Arrays.fill(productionHeaders, "");
+
+        for (int i = 0; i < productions.size(); i++) {
+            productionNames[3 * i] = productions.get(i).getName();
+            productionHeaders[3 * i] = "Role";
+            productionHeaders[3 * i + 1] = "Member";
+        }
+        output.add(productionNames);
+        output.add(productionHeaders);
+
+        // Create other rows
+        for (int i = 0; i < maxLength; i++) {
+            String[] row = new String[width];
+            Arrays.fill(row, "");
+            for (int j = 0; j < productions.size(); j++) {
+                Production production = productions.get(j);
+                if (i < productionLengths.get(j)) {
+                    row[3 * j] = production.getRoles().get(i);
+                    row[3 * j + 1] = production.getMembers().get(i);
+                }
+            }
+            output.add(row);
+        }
+
+        return output;
+    }
+
+    // Get the number of rows each production will require
+    private static List<Integer> getProductionLengths(List<Production> productions) {
+        List<Integer> prodLengths = new ArrayList<>();
+
+        for (Production productionToCheck : productions) {
+            // Add the length of the roles list
+            prodLengths.add(productionToCheck.getRoles().size());
+        }
+
+        return prodLengths;
     }
 }
