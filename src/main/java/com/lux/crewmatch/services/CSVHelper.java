@@ -121,7 +121,6 @@ public class CSVHelper {
 
         // Get number of rows required for each production
         List<Integer> productionLengths = getProductionLengths(productions);
-        System.out.println(productionLengths);
         int maxLength = Collections.max(productionLengths);
 
         // Beginning row containing production names

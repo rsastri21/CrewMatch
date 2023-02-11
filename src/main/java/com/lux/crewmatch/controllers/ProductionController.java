@@ -8,10 +8,13 @@ import com.lux.crewmatch.entities.Production;
 import com.lux.crewmatch.services.CSVService;
 import com.lux.crewmatch.services.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.core.io.InputStreamResource;
 import com.lux.crewmatch.services.CSVHelper;
 
 import java.util.*;
@@ -110,9 +113,24 @@ public class ProductionController {
     }
 
     // TEST
-    @GetMapping("/getCSV")
-    public List<String[]> convertToCSV() {
-        return fileService.dataToCSV(this.productionRepository.findAll());
+    @GetMapping("/getCSV/{filename}")
+    public ResponseEntity<Resource> convertToCSV(@PathVariable("filename") String filename) {
+        InputStreamResource fileInputStream = fileService.dataToCSV(this.productionRepository.findAll());
+
+        String csvFileName = filename + ".csv";
+
+        // HTTP Headers for response
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + csvFileName);
+        // Specifying return type
+        headers.set(HttpHeaders.CONTENT_TYPE, "text/csv");
+
+        return new ResponseEntity<>(
+                fileInputStream,
+                headers,
+                HttpStatus.OK
+        );
+
     }
 
     /**
