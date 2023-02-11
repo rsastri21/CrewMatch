@@ -5,6 +5,7 @@ import com.lux.crewmatch.entities.SwapRequest;
 import com.lux.crewmatch.repositories.CandidateRepository;
 import com.lux.crewmatch.repositories.ProductionRepository;
 import com.lux.crewmatch.entities.Production;
+import com.lux.crewmatch.repositories.SwapRequestRepository;
 import com.lux.crewmatch.services.CSVService;
 import com.lux.crewmatch.services.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,16 @@ public class ProductionController {
     @GetMapping("/getNoLead")
     public List<Production> getProductionsNoLead() {
         return this.productionRepository.findByProdLeadIsNull();
+    }
+
+    /**
+     * Gets all productions that have an assigned production lead.
+     * Accepts HTTP GET requests at the "./getLead" API endpoint.
+     * @return - returns a list containing all the productions that match the criteria.
+     */
+    @GetMapping("/getLead")
+    public List<Production> getProductionsWithLead() {
+        return this.productionRepository.findByProdLeadIsNotNull();
     }
 
     /**
@@ -319,82 +330,6 @@ public class ProductionController {
         this.candidateRepository.save(candidateToAssign);
 
         return ResponseEntity.status(HttpStatus.OK).body("The candidate was assigned.");
-    }
-
-    /**
-     * Swaps members between two productions. Throws bad request exceptions if any of the productions or members
-     * specified are not present.
-     * Accepts HTTP PUT requests at the "./swap/..." API endpoint.
-     * @param swapRequest - A swap request with the parameters outlined in the entity model.
-     * @return - Returns a ResponseEntity indicating whether the swap was successful.
-     */
-    @PutMapping("/swap")
-    public ResponseEntity<String> swapMembers(@RequestBody SwapRequest swapRequest) {
-        // Find the first production
-        String production1 = swapRequest.getProduction1();
-        Optional<Production> productionOptionalOne = Optional.ofNullable(this.productionRepository.findByName(production1));
-        if (productionOptionalOne.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no production matching the first name.");
-        }
-        Production productionOne = productionOptionalOne.get();
-
-        // Find the second production
-        String production2 = swapRequest.getProduction2();
-        Optional<Production> productionOptionalTwo = Optional.ofNullable(this.productionRepository.findByName(production2));
-        if (productionOptionalTwo.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no production matching the second name.");
-        }
-        Production productionTwo = productionOptionalTwo.get();
-
-        // Check members are not missing
-        String member1 = swapRequest.getMember1();
-        String member2 = swapRequest.getMember2();
-        if (!checkMemberPresent(productionOne, member1) || !checkMemberPresent(productionTwo, member2)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("One of the members is missing from its production.");
-        }
-
-        // Swap members
-        swapMembers(productionOne, member1, swapRequest.getRole1(), member2);
-        swapMembers(productionTwo, member2, swapRequest.getRole2(), member1);
-
-        return ResponseEntity.status(HttpStatus.OK).body("The members have been swapped.");
-
-    }
-
-
-    /**
-     * A helper method that checks if the member specified is present in the given production.
-     * @param production - A production instance from which the member will be checked.
-     * @param memberToCheck - A string identifying the member's name.
-     * @return - A boolean that is true when the member is present and false when not.
-     */
-    private boolean checkMemberPresent(Production production, String memberToCheck) {
-        for (String member : production.getMembers()) {
-            if (member.startsWith(memberToCheck)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * A helper method that peforms a single swap on a production and saves the updated production.
-     * @param production - A production instance in which members will be swapped.
-     * @param member1 - A string which represents the name of the first member that is to be found in the production.
-     * @param role - A string identifying the role of member1 that member2 is to be swapped into.
-     * @param member2 - A string which represents the name of the second member that is to be swapped into the production.
-     */
-    private void swapMembers(Production production, String member1, String role, String member2) {
-        List<String> prodMembers = new ArrayList<>(production.getMembers());
-        List<String> prodRoles = production.getRoles();
-        for (int i = 0; i < prodMembers.size(); i++) {
-            if (prodMembers.get(i).startsWith(member1) && prodRoles.get(i).equals(role)) {
-                prodMembers.set(i, member2);
-                production.setMembers(prodMembers);
-                this.productionRepository.save(production);
-                break;
-            }
-        }
     }
 
     /**

@@ -10,6 +10,15 @@ public class SwapRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "COMPLETED")
+    private Boolean completed;
+
+    @Column(name = "LEAD_FROM")
+    private String fromLead;
+
+    @Column(name = "LEAD_TO")
+    private String toLead;
+
     @Column(name = "PRODUCTION1")
     private String production1;
 
@@ -40,6 +49,30 @@ public class SwapRequest {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Boolean getCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(Boolean completed) {
+        this.completed = completed;
+    }
+
+    public String getFromLead() {
+        return fromLead;
+    }
+
+    public void setFromLead(String fromLead) {
+        this.fromLead = fromLead;
+    }
+
+    public String getToLead() {
+        return toLead;
+    }
+
+    public void setToLead(String toLead) {
+        this.toLead = toLead;
     }
 
     public String getProduction1() {
