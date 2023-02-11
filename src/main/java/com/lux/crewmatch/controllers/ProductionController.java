@@ -71,7 +71,7 @@ public class ProductionController {
      * contains the integer count of productions.
      */
     @GetMapping("/getCount")
-    public ResponseEntity<Integer> getNumberOfCandidates() {
+    public ResponseEntity<Integer> getNumberOfProductions() {
         return ResponseEntity.status(HttpStatus.OK).body((int) this.productionRepository.count());
     }
 
@@ -112,9 +112,19 @@ public class ProductionController {
         return roles.stream().toList();
     }
 
-    // TEST
+    /**
+     * Exports the data of all production assignments to CSV format.
+     * Accepts HTTP GET requests at the "./getCSV/{filename}" API endpoint.
+     * @param filename - A string path variable describing the name of the output file.
+     * @return - Returns a CSV file with the assignment data.
+     */
     @GetMapping("/getCSV/{filename}")
     public ResponseEntity<Resource> convertToCSV(@PathVariable("filename") String filename) {
+        // Check that productions exist
+        if (this.productionRepository.count() == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There are no productions to display.");
+        }
+
         InputStreamResource fileInputStream = fileService.dataToCSV(this.productionRepository.findAll());
 
         String csvFileName = filename + ".csv";
