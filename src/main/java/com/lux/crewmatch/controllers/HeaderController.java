@@ -16,12 +16,25 @@ public class HeaderController {
 
     private final HeaderRepository headerRepository;
 
-    // Dependency Injection
+    /**
+     * Creates an instance of the HeaderController to handle requests related to changing the CSV headers.
+     * The purpose of this constructor is to properly configure the dependency injection of the repository
+     * so that it is available for each of the requests.
+     * This controller follows the Singleton design pattern, where only one header object is stored to maintain the
+     * active configuration.
+     * @param headerRepository - The repository where the headers are stored.
+     */
     public HeaderController(HeaderRepository headerRepository) {
         this.headerRepository = headerRepository;
     }
 
-    // Get the current headers.
+    /**
+     * Gets the current header configuration from the repository.
+     * Accepts HTTP GET requests at the "./get" API endpoint.
+     * Throws an exception if there are no headers created.
+     * @return - Returns the Singleton header object which contains the current CSV headers for the active
+     * configuration.
+     */
     @GetMapping("/get")
     public ResponseEntity<Header> getHeaders() {
         Optional<Header> headerOptional = Optional.ofNullable(this.headerRepository.findByName("header"));
@@ -33,8 +46,15 @@ public class HeaderController {
         return ResponseEntity.status(HttpStatus.OK).body(header);
     }
 
-    // Create a new set of headers
-    // Should update the existing set if there is an entry stored
+    /**
+     * Creates a new header to store a new active configuration. If a configuration has already been created, it
+     * overwrites the existing one to maintain the persistence of a single header object.
+     * Accepts HTTP POST requests at the "./update" API endpoint with a serialized header object in the request body.
+     * Throws an exception if the title of the serialized object is not "header", or if the appropriate number of headers
+     * are not provided.
+     * @param header - A header object with the new configuration to be stored.
+     * @return - Returns a ResponseEntity indicating the status of the creation.
+     */
     @PostMapping("/update")
     public ResponseEntity<Header> updateHeaders(@RequestBody Header header) {
         if (!header.getName().equals("header")) {
