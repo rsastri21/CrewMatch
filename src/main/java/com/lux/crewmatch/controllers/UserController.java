@@ -6,6 +6,7 @@ import com.lux.crewmatch.entities.Production;
 import com.lux.crewmatch.entities.User;
 import com.lux.crewmatch.repositories.ProductionRepository;
 import com.lux.crewmatch.repositories.UserRepository;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -68,6 +69,18 @@ public class UserController {
         // Save the user
         this.userRepository.save(userToRegister);
 
+    }
+
+    // Get a user's details by username
+    @GetMapping("/search")
+    public User getByUsername(@RequestParam(name = "username") String username) {
+        Optional<User> userOptional = Optional.ofNullable(this.userRepository.findByUsername(username));
+
+        if (userOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no user matching that username.");
+        }
+
+        return userOptional.get();
     }
 
     // Log a user in
