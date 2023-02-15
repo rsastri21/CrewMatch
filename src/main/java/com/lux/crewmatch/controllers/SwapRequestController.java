@@ -21,19 +21,34 @@ public class SwapRequestController {
     private final SwapRequestRepository swapRequestRepository;
     private final ProductionRepository productionRepository;
 
-    // Dependency Injection
+    /**
+     * Creates an instance of the SwapRequestController for handling swap requests. Configures dependency injection so
+     * repositories are accessible to other API endpoints.
+     * @param swapRequestRepository - An instance of the repository where swap requests are stored.
+     * @param productionRepository - An instance of the repository where productions are stored.
+     */
     public SwapRequestController(SwapRequestRepository swapRequestRepository, ProductionRepository productionRepository) {
         this.swapRequestRepository = swapRequestRepository;
         this.productionRepository = productionRepository;
     }
 
-    // Get all swap requests
+    /**
+     * Gets all submitted swap requests.
+     * Accepts HTTP GET requests at the "./get" API endpoint.
+     * @return - Returns an iterable containing all of the current swap requests.
+     */
     @GetMapping("/get")
     public Iterable<SwapRequest> getAllSwapRequests() {
         return this.swapRequestRepository.findAll();
     }
 
-    // Get swap request by ID
+    /**
+     * Gets a particular swap request by its ID.
+     * Accepts HTTP GET requests at the "./get/{id}" API endpoint.
+     * Throws an exception if there is no matching swap request to the provided ID.
+     * @param id - An integer ID that specifies a particular swap request, provided as a path variable.
+     * @return - Returns a swap request matching the ID.
+     */
     @GetMapping("/get/{id}")
     public SwapRequest getSwapRequestById(@PathVariable("id") Integer id) {
         Optional<SwapRequest> swapRequest = this.swapRequestRepository.findById(id);
@@ -46,7 +61,13 @@ public class SwapRequestController {
         return swapRequest.get();
     }
 
-    // Create a new swap request
+    /**
+     * Creates a new swap request.
+     * Accepts HTTP POST requests at the "./create" API endpoint.
+     * @param request - A serialized SwapRequest entity provided in the request body carrying the details of the
+     * request.
+     * @return - Returns the created SwapRequest instance.
+     */
     @PostMapping("/create")
     public SwapRequest createNewSwapRequest(@RequestBody SwapRequest request) {
         // New request to save
