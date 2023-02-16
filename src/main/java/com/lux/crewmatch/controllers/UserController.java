@@ -85,7 +85,7 @@ public class UserController {
 
     // Log a user in
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody User user) {
+    public ResponseEntity<String[]> loginUser(@RequestBody User user) {
         // Find the user
         Optional<User> userOptional = Optional.ofNullable(this.userRepository.findByUsername(user.getUsername()));
         if (userOptional.isEmpty()) {
@@ -99,7 +99,7 @@ public class UserController {
         if (!validPassword) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "The username and password do not match.");
         }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(userToLogin.getRole());
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new String[]{ userToLogin.getRole(), userToLogin.getLeads() });
 
     }
 
