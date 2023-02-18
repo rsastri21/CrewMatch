@@ -8,6 +8,7 @@ import com.lux.crewmatch.entities.Production;
 import com.lux.crewmatch.repositories.SwapRequestRepository;
 import com.lux.crewmatch.services.CSVService;
 import com.lux.crewmatch.services.MatchService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -330,6 +331,52 @@ public class ProductionController {
         this.candidateRepository.save(candidateToAssign);
 
         return ResponseEntity.status(HttpStatus.OK).body("The candidate was assigned.");
+    }
+
+    /**
+     * Removes a member from a production by unassigning them.
+     * Accepts HTTP PUT requests at the "./unassign/{productionID}/{candidateID}/{roleIndex}" API endpoint.
+     * @param productionID - An integer identifying the production to be updated.
+     * @param candidateID - An integer identifying the candidate to be removed.
+     * @param roleIndex - The index identifying the role of the candidate to be removed.
+     * @return - Returns a Response Entity with a message containing the status of the removal.
+     */
+    @PutMapping("/unassign/{productionID}/{candidateID}/{roleIndex}")
+    public ResponseEntity<String> manualCandidateRemoval(@RequestParam(name = "productionID") Integer productionID,
+                                                         @RequestParam(name = "candidateID") Integer candidateID,
+                                                         @RequestParam(name = "roleIndex") Integer roleIndex) {
+        // Get the requested production
+        Optional<Production> productionOptional = this.productionRepository.findById(productionID);
+        if (productionOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no production with that ID.");
+        }
+        Production production = productionOptional.get();
+
+        // Get the candidate
+        Optional<Candidate> candidateOptional = this.candidateRepository.findById(candidateID);
+        if (candidateOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no candidate with that ID.");
+        }
+        Candidate candidate = candidateOptional.get();
+
+        // Iterate and find the candidate to remove
+        List<String> crewMembers = new ArrayList<>(production.getMembers());
+
+        for (int i = 0; i < production.getMembers().size(); i++) {
+            if (production.getMembers().get(i).startsWith(candidate.getName()) && i == roleIndex) {
+                candidate.setAssigned(false);
+                crewMembers.set(i, "");
+            }
+        }
+
+        production.setMembers(crewMembers);
+
+        // Save the updated production and candidate
+        this.productionRepository.save(production);
+        this.candidateRepository.save(candidate);
+
+        return ResponseEntity.status(HttpStatus.OK).body("The member was removed.");
+
     }
 
     /**
