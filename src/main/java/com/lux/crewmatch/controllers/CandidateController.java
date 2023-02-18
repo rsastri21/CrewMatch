@@ -5,6 +5,7 @@ import com.lux.crewmatch.services.CSVHelper;
 import com.lux.crewmatch.message.ResponseMessage;
 import com.lux.crewmatch.repositories.CandidateRepository;
 import com.lux.crewmatch.services.CSVService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -148,6 +149,21 @@ public class CandidateController {
             return this.candidateRepository.findByActingInterestTrue();
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Gets a candidate by name.
+     * Accepts HTTP GET requests at the "./getByName" API endpoint.
+     * @param name - A string name identifying the candidate provided as a parameter in the request.
+     * @return - Returns the candidate entity if it exists, throws an exception if not.
+     */
+    @GetMapping("/getByName")
+    public Candidate getCandidateByName(@RequestParam(name = "name") String name) {
+        Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(name));
+        if (candidateOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no candidate with that name");
+        }
+        return candidateOptional.get();
     }
 
     /**
