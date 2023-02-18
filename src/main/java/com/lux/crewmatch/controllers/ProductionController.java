@@ -342,9 +342,9 @@ public class ProductionController {
      * @return - Returns a Response Entity with a message containing the status of the removal.
      */
     @PutMapping("/unassign/{productionID}/{candidateID}/{roleIndex}")
-    public ResponseEntity<String> manualCandidateRemoval(@RequestParam(name = "productionID") Integer productionID,
-                                                         @RequestParam(name = "candidateID") Integer candidateID,
-                                                         @RequestParam(name = "roleIndex") Integer roleIndex) {
+    public ResponseEntity<String> manualCandidateRemoval(@PathVariable("productionID") Integer productionID,
+                                                         @PathVariable("candidateID") Integer candidateID,
+                                                         @PathVariable("roleIndex") Integer roleIndex) {
         // Get the requested production
         Optional<Production> productionOptional = this.productionRepository.findById(productionID);
         if (productionOptional.isEmpty()) {
