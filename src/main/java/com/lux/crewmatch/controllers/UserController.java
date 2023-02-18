@@ -13,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @CrossOrigin
@@ -170,10 +172,23 @@ public class UserController {
                 productionToUpdate.getName());
     }
 
+    // Reset all users by setting production lead field to empty string
+    @PutMapping("/reset")
+    @ResponseStatus(code = HttpStatus.OK, reason = "All users have been reset.")
+    public void resetUsers() {
+        Iterable<User> usersIterable = this.userRepository.findAll();
+
+        for (User userToUpdate : usersIterable) {
+            userToUpdate.setLeads("");
+            this.userRepository.save(userToUpdate);
+        }
+
+    }
+
     // Delete a user
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(code = HttpStatus.OK, reason = "The candidate has been deleted.")
-    public void deleteCandidate(@PathVariable("id") Integer id) {
+    public void deleteUsers(@PathVariable("id") Integer id) {
         Optional<User> userToDeleteOptional = this.userRepository.findById(id);
 
         if (userToDeleteOptional.isEmpty()) {
