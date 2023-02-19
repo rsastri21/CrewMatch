@@ -223,6 +223,7 @@ public class ProductionController {
                 }
                 candidateToAdd.setName(memberName);
                 candidateToAdd.setAssigned(true);
+                candidateToAdd.setActingInterest(false);
 
                 this.candidateRepository.save(candidateToAdd);
             } else {
