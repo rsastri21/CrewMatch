@@ -270,7 +270,36 @@ public class ProductionController {
             productionToUpdate.setRoles(p.getRoles());
         }
         if (p.getMembers() != null) {
-            productionToUpdate.setMembers(p.getMembers());
+
+            List<String> members = new ArrayList<>(p.getMembers());
+
+            // Iterate through candidates to validate with existing store
+            for (String member : members) {
+                // Pull the candidate from repository
+                // Skip if member is ""
+                if (member.equals("")) {
+                    continue;
+                }
+                Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
+                if (candidateOptional.isPresent()) {
+                    // Set candidate assigned field to true
+                    Candidate candidate = candidateOptional.get();
+                    candidate.setAssigned(true);
+                    this.candidateRepository.save(candidate);
+                } else {
+                    // Candidate not present -> Create a new skeleton candidate
+                    Candidate newCandidate = new Candidate();
+                    newCandidate.setName(member);
+                    newCandidate.setAssigned(true);
+                    newCandidate.setActingInterest(false);
+
+                    // Save
+                    this.candidateRepository.save(newCandidate);
+                }
+            }
+
+            productionToUpdate.setMembers(members);
+
         }
 
         return this.productionRepository.save(productionToUpdate);
