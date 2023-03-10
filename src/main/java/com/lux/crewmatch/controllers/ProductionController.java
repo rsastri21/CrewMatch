@@ -274,24 +274,18 @@ public class ProductionController {
             List<String> members = new ArrayList<>(p.getMembers());
 
             // Iterate through candidates to validate with existing store
-            for (int i = 0; i < members.size(); i++) {
+            for (String member : members) {
                 // Pull the candidate from repository
-                String member = members.get(i);
                 // Skip if member is ""
                 if (member.equals("")) {
                     continue;
                 }
-                String currMember = productionToUpdate.getMembers().get(i);
                 Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
                 if (candidateOptional.isPresent()) {
-                    // If candidate is already assigned then remove from update, else setAssigned -> true
+                    // Set candidate assigned field to true
                     Candidate candidate = candidateOptional.get();
-                    if (candidate.getAssigned() && !currMember.equals(candidate.getName())) {
-                        members.set(i, "");
-                    } else {
-                        candidate.setAssigned(true);
-                        this.candidateRepository.save(candidate);
-                    }
+                    candidate.setAssigned(true);
+                    this.candidateRepository.save(candidate);
                 } else {
                     // Candidate not present -> Create a new skeleton candidate
                     Candidate newCandidate = new Candidate();
