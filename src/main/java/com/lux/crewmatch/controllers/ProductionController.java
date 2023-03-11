@@ -290,6 +290,7 @@ public class ProductionController {
                     Candidate candidateToUnassign = candidateOptional.get();
                     candidateToUnassign.setAssigned(false);
                     this.candidateRepository.save(candidateToUnassign);
+                    continue;
                 }
                 Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
                 if (candidateOptional.isPresent()) {
