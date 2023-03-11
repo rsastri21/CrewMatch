@@ -274,11 +274,22 @@ public class ProductionController {
             List<String> members = new ArrayList<>(p.getMembers());
 
             // Iterate through candidates to validate with existing store
-            for (String member : members) {
+            for (int i = 0; i < members.size(); i++) {
+                String member = members.get(i);
                 // Pull the candidate from repository
                 // Skip if member is ""
                 if (member.equals("")) {
-                    continue;
+                    // If previous value was not empty, set that candidate to unassigned
+                    if (member.equals(productionToUpdate.getMembers().get(i))) {
+                        continue;
+                    }
+                    Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(productionToUpdate.getMembers().get(i)));
+                    if (candidateOptional.isEmpty()) {
+                        continue;
+                    }
+                    Candidate candidateToUnassign = candidateOptional.get();
+                    candidateToUnassign.setAssigned(false);
+                    this.candidateRepository.save(candidateToUnassign);
                 }
                 Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
                 if (candidateOptional.isPresent()) {
