@@ -135,9 +135,9 @@ public class UserController {
         }
         User userToAssign = userOptional.get();
 
-        // If the user that is becoming a production lead is not already a production head, update the role.
+        // If a user has user permissions, ineligible to become a production head.
         if (userToAssign.getRole().equals("user")) {
-            userToAssign.setRole("production head");
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "A user cannot be a production head.");
         }
 
         // If the user is already a production lead, remove the association.
