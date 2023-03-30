@@ -279,6 +279,9 @@ public class ProductionController {
                 // Pull the candidate from repository
                 // Skip if member is ""
                 if (member.equals("")) {
+                    if (i >= productionToUpdate.getMembers().size()) {
+                        continue;
+                    }
                     // If previous value was not empty, set that candidate to unassigned
                     if (member.equals(productionToUpdate.getMembers().get(i))) {
                         continue;
