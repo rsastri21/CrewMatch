@@ -271,15 +271,28 @@ public class ProductionController {
         }
         if (p.getMembers() != null) {
 
+            // Set all members who are currently assigned to unassigned
+            // Purpose is to revalidate with the second iteration
+            for (String member : productionToUpdate.getMembers()) {
+                // Pull candidate from repository
+                Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
+                // Set assigned to false if candidate is present
+                if (candidateOptional.isPresent()) {
+                    Candidate candidate = candidateOptional.get();
+                    candidate.setAssigned(false);
+                    this.candidateRepository.save(candidate);
+                }
+            }
+
             List<String> members = new ArrayList<>(p.getMembers());
 
-            // Iterate through candidates to validate with existing store
+            // Iterate through candidates in updated production to validate with existing store
             for (String member : members) {
-                // Pull the candidate from repository
-                // Skip if member is ""
+                // If string is empty, skip
                 if (member.equals("")) {
                     continue;
                 }
+                // Pull the candidate from repository
                 Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
                 if (candidateOptional.isPresent()) {
                     // Set candidate assigned field to true
