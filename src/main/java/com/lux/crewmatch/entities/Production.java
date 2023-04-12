@@ -47,9 +47,10 @@ public class Production {
             if (intendedRole.equals(roles.get(i)) && members.get(i).equals("")) {
                 // String to store including pronouns
                 String name = candidate.getName();
-                if (candidate.getPronouns() != null) {
-                    name = name + " (" + candidate.getPronouns() + ")";
-                }
+                // Temporarily disabling this feature until a fix is created.
+//                if (candidate.getPronouns() != null) {
+//                    name = name + " (" + candidate.getPronouns() + ")";
+//                }
                 // Add candidate
                 members.set(i, name);
                 return true;

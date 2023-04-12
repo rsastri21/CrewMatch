@@ -135,11 +135,6 @@ public class UserController {
         }
         User userToAssign = userOptional.get();
 
-        // If the user that is becoming a production lead is not already a production head, update the role.
-        if (userToAssign.getRole().equals("user")) {
-            userToAssign.setRole("production head");
-        }
-
         // If the user is already a production lead, remove the association.
         String currentProd = userToAssign.getLeads();
         Optional<Production> currentOptional = Optional.ofNullable(this.productionRepository.findByName(currentProd));
@@ -148,6 +143,13 @@ public class UserController {
             current.setProdLead(null);
             // Save
             this.productionRepository.save(current);
+        }
+
+        // If a user has user permissions, ineligible to become a production head.
+        if (userToAssign.getRole().equals("user")) {
+            userToAssign.setLeads("");
+            this.userRepository.save(userToAssign);
+            return ResponseEntity.status(HttpStatus.OK).body("This user can no longer be a production lead.");
         }
 
         // Validate that the intended production exists.
