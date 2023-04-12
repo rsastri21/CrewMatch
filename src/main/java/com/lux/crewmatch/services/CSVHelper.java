@@ -44,7 +44,7 @@ public class CSVHelper {
             return name;
         }
 
-        String[] names = name.split(" ");
+        String[] names = name.split("\\s+");
 
         StringBuilder result = new StringBuilder();
         // Capitalize first letter
