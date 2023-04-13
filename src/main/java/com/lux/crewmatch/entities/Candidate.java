@@ -55,6 +55,12 @@ public class Candidate {
     @Column(name = "ASSIGNED")
     private Boolean assigned;
 
+    @Column(name = "PRODUCTION")
+    private String production;
+
+    @Column(name = "ROLE")
+    private String role;
+
     public Candidate() {
 
     }
