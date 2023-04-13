@@ -119,6 +119,8 @@ public class MatchService {
                     if (productionToTry.place(candidate, role)) {
                         numCandidatesAssigned++;
                         candidate.setAssigned(true);
+                        candidate.setRole(role);
+                        candidate.setProduction(productionToTry.getName());
                         productionRepository.save(productionToTry);
                         candidateRepository.save(candidate);
                         break;
@@ -156,6 +158,8 @@ public class MatchService {
                 if (productionToTry.place(candidate, role)) {
                     numCandidatesAssigned++;
                     candidate.setAssigned(true);
+                    candidate.setRole(role);
+                    candidate.setProduction(productionToTry.getName());
                     productionRepository.save(productionToTry);
                     candidateRepository.save(candidate);
                     break;
@@ -189,6 +193,8 @@ public class MatchService {
                 if (productionToTry.place(candidate, role)) {
                     numCandidatesAssigned++;
                     candidate.setAssigned(true);
+                    candidate.setRole(role);
+                    candidate.setProduction(productionToTry.getName());
                     productionRepository.save(productionToTry);
                     candidateRepository.save(candidate);
                     break;
