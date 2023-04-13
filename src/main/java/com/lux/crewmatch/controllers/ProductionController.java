@@ -212,7 +212,8 @@ public class ProductionController {
         }
         // Prior to saving, check if members in the production are not created candidates yet
         List<String> crew = production.getMembers();
-        for (String member : crew) {
+        for (int i = 0; i < crew.size(); i++) {
+            String member = crew.get(i);
             // See if candidate exists, create an entry if not
             String memberName = CSVHelper.formatName(member);
             Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(memberName));
@@ -223,6 +224,8 @@ public class ProductionController {
                 }
                 candidateToAdd.setName(memberName);
                 candidateToAdd.setAssigned(true);
+                candidateToAdd.setProduction(production.getName());
+                candidateToAdd.setRole(production.getRoles().get(i));
                 candidateToAdd.setActingInterest(false);
 
                 this.candidateRepository.save(candidateToAdd);
@@ -230,6 +233,8 @@ public class ProductionController {
                 // If the candidate already exists, set assigned property to true
                 Candidate candidateToUpdate = candidateOptional.get();
                 candidateToUpdate.setAssigned(true);
+                candidateToUpdate.setProduction(production.getName());
+                candidateToUpdate.setRole(production.getRoles().get(i));
                 this.candidateRepository.save(candidateToUpdate);
             }
         }
@@ -280,6 +285,8 @@ public class ProductionController {
                 if (candidateOptional.isPresent()) {
                     Candidate candidate = candidateOptional.get();
                     candidate.setAssigned(false);
+                    candidate.setProduction(null);
+                    candidate.setRole(null);
                     this.candidateRepository.save(candidate);
                 }
             }
@@ -287,7 +294,8 @@ public class ProductionController {
             List<String> members = new ArrayList<>(p.getMembers());
 
             // Iterate through candidates in updated production to validate with existing store
-            for (String member : members) {
+            for (int i = 0; i < members.size(); i++) {
+                String member = members.get(i);
                 // If string is empty, skip
                 if (member.equals("")) {
                     continue;
@@ -298,12 +306,16 @@ public class ProductionController {
                     // Set candidate assigned field to true
                     Candidate candidate = candidateOptional.get();
                     candidate.setAssigned(true);
+                    candidate.setProduction(productionToUpdate.getName());
+                    candidate.setRole(p.getRoles().get(i));
                     this.candidateRepository.save(candidate);
                 } else {
                     // Candidate not present -> Create a new skeleton candidate
                     Candidate newCandidate = new Candidate();
                     newCandidate.setName(member);
                     newCandidate.setAssigned(true);
+                    newCandidate.setProduction(productionToUpdate.getName());
+                    newCandidate.setRole(p.getRoles().get(i));
                     newCandidate.setActingInterest(false);
 
                     // Save
@@ -351,19 +363,12 @@ public class ProductionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The candidate is already assigned.");
         }
 
-        // Configure candidate name
-        StringBuilder candidateDisplayName = new StringBuilder();
-        candidateDisplayName.append(candidateToAssign.getName());
-        if (candidateToAssign.getPronouns() != null) {
-            candidateDisplayName.append(" (").append(candidateToAssign.getPronouns()).append(")");
-        }
-
         // Assign the candidate to the requested role if it is empty
         List<String> productionMembers = new ArrayList<>(productionToUpdate.getMembers());
         if (!productionMembers.get(roleIndex).equals("")) {
             return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("The desired role is already filled");
         }
-        productionMembers.set(roleIndex, candidateDisplayName.toString());
+        productionMembers.set(roleIndex, candidateToAssign.getName());
 
         // Update production
         productionToUpdate.setMembers(productionMembers);
@@ -371,6 +376,8 @@ public class ProductionController {
 
         // Change candidate status to assigned
         candidateToAssign.setAssigned(true);
+        candidateToAssign.setProduction(productionToUpdate.getName());
+        candidateToAssign.setRole(productionToUpdate.getRoles().get(roleIndex));
         this.candidateRepository.save(candidateToAssign);
 
         return ResponseEntity.status(HttpStatus.OK).body("The candidate was assigned.");
@@ -408,6 +415,8 @@ public class ProductionController {
         for (int i = 0; i < production.getMembers().size(); i++) {
             if (production.getMembers().get(i).startsWith(candidate.getName()) && i == roleIndex) {
                 candidate.setAssigned(false);
+                candidate.setProduction(null);
+                candidate.setRole(null);
                 crewMembers.set(i, "");
             }
         }

@@ -161,4 +161,20 @@ public class Candidate {
     public void setAssigned(Boolean assigned) {
         this.assigned = assigned;
     }
+
+    public String getProduction() {
+        return production;
+    }
+
+    public void setProduction(String production) {
+        this.production = production;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }
