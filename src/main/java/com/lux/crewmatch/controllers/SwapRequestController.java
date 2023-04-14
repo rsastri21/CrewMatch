@@ -1,7 +1,9 @@
 package com.lux.crewmatch.controllers;
 
+import com.lux.crewmatch.entities.Candidate;
 import com.lux.crewmatch.entities.Production;
 import com.lux.crewmatch.entities.SwapRequest;
+import com.lux.crewmatch.repositories.CandidateRepository;
 import com.lux.crewmatch.repositories.ProductionRepository;
 import com.lux.crewmatch.repositories.SwapRequestRepository;
 import org.springframework.http.HttpStatus;
@@ -20,16 +22,19 @@ public class SwapRequestController {
 
     private final SwapRequestRepository swapRequestRepository;
     private final ProductionRepository productionRepository;
+    private final CandidateRepository candidateRepository;
 
     /**
      * Creates an instance of the SwapRequestController for handling swap requests. Configures dependency injection so
      * repositories are accessible to other API endpoints.
      * @param swapRequestRepository - An instance of the repository where swap requests are stored.
      * @param productionRepository - An instance of the repository where productions are stored.
+     * @param candidateRepository - An instance of the repository where candidates are stored.
      */
-    public SwapRequestController(SwapRequestRepository swapRequestRepository, ProductionRepository productionRepository) {
+    public SwapRequestController(SwapRequestRepository swapRequestRepository, ProductionRepository productionRepository, CandidateRepository candidateRepository) {
         this.swapRequestRepository = swapRequestRepository;
         this.productionRepository = productionRepository;
+        this.candidateRepository = candidateRepository;
     }
 
     /**
@@ -151,6 +156,23 @@ public class SwapRequestController {
         // Swap members
         swapMembers(productionOne, member1, swapRequest.getRole1(), member2);
         swapMembers(productionTwo, member2, swapRequest.getRole2(), member1);
+
+        // Update the roles that the candidates are assigned to
+        Optional<Candidate> candidate1Optional = Optional.ofNullable(this.candidateRepository.findByName(member1));
+        if (candidate1Optional.isPresent()) {
+            Candidate candidate1 = candidate1Optional.get();
+            candidate1.setProduction(productionTwo.getName());
+            candidate1.setRole(swapRequest.getRole2());
+            this.candidateRepository.save(candidate1);
+        }
+
+        Optional<Candidate> candidate2Optional = Optional.ofNullable(this.candidateRepository.findByName(member2));
+        if (candidate2Optional.isPresent()) {
+            Candidate candidate2 = candidate2Optional.get();
+            candidate2.setProduction(productionOne.getName());
+            candidate2.setRole(swapRequest.getRole1());
+            this.candidateRepository.save(candidate2);
+        }
 
         // Save the swap request as completed
         swapRequest.setCompleted(true);
