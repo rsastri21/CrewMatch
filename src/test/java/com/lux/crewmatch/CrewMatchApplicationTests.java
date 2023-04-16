@@ -23,8 +23,8 @@ class CrewMatchApplicationTests {
     @Test
     void assignmentTest() {
         // Create dummy assignments
-        Assignment assignment1 = new Assignment(null, null, 0, 0.65);
-        Assignment assignment2 = new Assignment(null, null, 0, 0.47);
+        Assignment assignment1 = new Assignment(null, null, 0, "", 0.65);
+        Assignment assignment2 = new Assignment(null, null, 0, "", 0.47);
 
         // Test Priority Queue
         PriorityQueue<Assignment> pq = new PriorityQueue<>(new AssignmentComparator());
