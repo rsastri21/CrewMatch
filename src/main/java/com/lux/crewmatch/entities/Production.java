@@ -77,7 +77,7 @@ public class Production {
         }
         for (int i = 0; i < roleWeights.size(); i++) {
             // Set each position to the normed value
-            roleWeights.set(i, roleWeights.get(i) / total);
+            roleWeights.set(i, roleWeights.get(i) / total * 10);
         }
     }
 

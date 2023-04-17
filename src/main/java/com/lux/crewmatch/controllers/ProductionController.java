@@ -8,6 +8,7 @@ import com.lux.crewmatch.entities.Production;
 import com.lux.crewmatch.repositories.SwapRequestRepository;
 import com.lux.crewmatch.services.CSVService;
 import com.lux.crewmatch.services.MatchService;
+import com.lux.crewmatch.services.WeightedMatchService;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -31,6 +32,9 @@ public class ProductionController {
 
     @Autowired
     MatchService matchService;
+
+    @Autowired
+    WeightedMatchService weightedMatchService;
 
     @Autowired
     CSVService fileService;
@@ -187,7 +191,7 @@ public class ProductionController {
      */
     @GetMapping("/weightedMatch")
     public ResponseEntity<String> weightedMatchCandidatesToProductions() {
-        return matchService.matchWithoutPreference();
+        return weightedMatchService.weightedMatch();
     }
 
     /**

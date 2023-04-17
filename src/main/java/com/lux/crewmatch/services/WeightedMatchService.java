@@ -26,7 +26,7 @@ public class WeightedMatchService {
     ProductionRepository productionRepository;
 
     // Candidate weight constant
-    private static final Double[] CANDIDATE_WEIGHTS = { 0.5, 0.35, 0.15 };
+    private static final Double[] CANDIDATE_WEIGHTS = { 4.0, 2.0, 1.0 };
 
     // Method to match candidates to productions with production role weights considered
     // Returns an HTTP response stating how many candidates were matched
