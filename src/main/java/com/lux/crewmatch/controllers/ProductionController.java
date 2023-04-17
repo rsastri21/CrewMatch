@@ -210,6 +210,10 @@ public class ProductionController {
         if (production.getMembers().size() != production.getRoles().size()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Roles and Members lists must be the same length.");
         }
+        // Ensure that the weights list is provided
+        if (production.getRoleWeights() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No weights have been provided for the roles list.");
+        }
         // Prior to saving, check if members in the production are not created candidates yet
         List<String> crew = production.getMembers();
         for (int i = 0; i < crew.size(); i++) {
@@ -245,6 +249,9 @@ public class ProductionController {
             crewFormatted.set(i, CSVHelper.formatName(crew.get(i)));
         }
         production.setMembers(new ArrayList<>(crewFormatted));
+
+        // Normalize inputted weights
+        production.normalize();
 
         return ResponseEntity.status(HttpStatus.OK).body(this.productionRepository.save(production));
     }
