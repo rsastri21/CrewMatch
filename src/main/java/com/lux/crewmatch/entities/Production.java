@@ -112,6 +112,7 @@ public class Production {
 
     public void setRoleWeights(List<Double> roleWeights) {
         this.roleWeights = roleWeights;
+        this.normalize();
     }
 
     public List<String> getMembers() {
