@@ -180,6 +180,17 @@ public class ProductionController {
     }
 
     /**
+     * Matches candidates to productions taking the role weightings into consideration.
+     * Accepts HTTP GET requests at the "./weightedMatch" API endpoint.
+     * @return - Returns a ResponseEntity with a message containing how many candidates were matched and how many
+     * remain to be matched. Returns an error message if there are no candidates or no productions to match.
+     */
+    @GetMapping("/weightedMatch")
+    public ResponseEntity<String> weightedMatchCandidatesToProductions() {
+        return matchService.matchWithoutPreference();
+    }
+
+    /**
      * Searches for productions by name. Throws a bad request exception if no production matches the name entered.
      * Accepts HTTP GET requests at the "./search" API endpoint.
      * @param name - A string entered as a query parameter that specifies the production to find.
