@@ -28,6 +28,14 @@ public class Production {
 
     @ElementCollection
     @CollectionTable(
+            name = "PROD_ROLE_WEIGHTS",
+            joinColumns = @JoinColumn(name = "id", referencedColumnName = "id")
+    )
+    @Column(name = "ROLE_WEIGHTS")
+    private List<Double> roleWeights;
+
+    @ElementCollection
+    @CollectionTable(
             name = "PRODUCTION_MEMBERS",
             joinColumns = @JoinColumn(name = "id", referencedColumnName = "id")
     )
@@ -61,6 +69,18 @@ public class Production {
         return false;
     }
 
+    // Normalize the weights of the role list
+    public void normalize() {
+        double total = 0;
+        for (Double num : roleWeights) {
+            total += num;
+        }
+        for (int i = 0; i < roleWeights.size(); i++) {
+            // Set each position to the normed value
+            roleWeights.set(i, roleWeights.get(i) / total);
+        }
+    }
+
     // Getters and Setters
     public Integer getId() {
         return id;
@@ -84,6 +104,14 @@ public class Production {
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
+    }
+
+    public List<Double> getRoleWeights() {
+        return roleWeights;
+    }
+
+    public void setRoleWeights(List<Double> roleWeights) {
+        this.roleWeights = roleWeights;
     }
 
     public List<String> getMembers() {
