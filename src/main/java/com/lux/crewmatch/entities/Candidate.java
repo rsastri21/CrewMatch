@@ -1,6 +1,8 @@
 package com.lux.crewmatch.entities;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -55,11 +57,13 @@ public class Candidate {
     @Column(name = "ASSIGNED")
     private Boolean assigned;
 
-    @Column(name = "PRODUCTION")
-    private String production;
+    @ElementCollection
+    @Column(name = "ASSIGNED_PRODUCTION")
+    private List<String> assignedProduction;
 
-    @Column(name = "ROLE")
-    private String role;
+    @ElementCollection
+    @Column(name = "ASSIGNED_ROLE")
+    private List<String> assignedRole;
 
     public Candidate() {
 
@@ -162,19 +166,55 @@ public class Candidate {
         this.assigned = assigned;
     }
 
-    public String getProduction() {
-        return production;
+    public List<String> getAssignedProduction() {
+        return assignedProduction;
     }
 
-    public void setProduction(String production) {
-        this.production = production;
+    public void setAssignedProduction(List<String> assignedProduction) {
+        this.assignedProduction = assignedProduction;
     }
 
-    public String getRole() {
-        return role;
+    public List<String> getAssignedRole() {
+        return assignedRole;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setAssignedRole(List<String> assignedRole) {
+        this.assignedRole = assignedRole;
+    }
+
+    public void assign(Production production, String role) {
+        setAssigned(true);
+        if (getAssignedProduction() == null) {
+            setAssignedProduction(new ArrayList<>());
+        }
+        if (getAssignedRole() == null) {
+            setAssignedRole(new ArrayList<>());
+        }
+        getAssignedProduction().add(production.getName());
+        getAssignedRole().add(role);
+    }
+
+    public void unassign(Production production, String role) {
+        setAssigned(false);
+
+        List<String> newAssignedRoles = new ArrayList<>();
+        List<String> newAssignedProductions = new ArrayList<>();
+
+        for (int i = 0; i < getAssignedRole().size(); i++) {
+            if (getAssignedRole().get(i).equals(role)
+                    && getAssignedProduction().get(i).equals(production.getName())) {
+                continue;
+            }
+            newAssignedRoles.add(getAssignedRole().get(i));
+            newAssignedProductions.add(getAssignedProduction().get(i));
+        }
+
+        if (newAssignedRoles.size() == 0) {
+            setAssignedRole(null);
+            setAssignedProduction(null);
+        } else {
+            setAssignedRole(newAssignedRoles);
+            setAssignedProduction(newAssignedProductions);
+        }
     }
 }

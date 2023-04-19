@@ -109,9 +109,7 @@ public class WeightedMatchService {
                 if (productionToTry.place(candidate, role)) {
                     numCandidatesAssigned++;
                     // Update candidate
-                    candidate.setAssigned(true);
-                    candidate.setRole(role);
-                    candidate.setProduction(productionToTry.getName());
+                    candidate.assign(productionToTry, role);
                     candidateRepository.save(candidate);
 
                     // Update production
@@ -177,8 +175,7 @@ public class WeightedMatchService {
                     numCandidatesAssigned++;
                     // Update candidate
                     candidate.setAssigned(true);
-                    candidate.setRole(role);
-                    candidate.setProduction(productionToTry.getName());
+                    candidate.assign(productionToTry, roleToTry);
                     candidateRepository.save(candidate);
 
                     // Update production

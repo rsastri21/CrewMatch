@@ -135,6 +135,12 @@ public class CSVService {
         if (c.getProdPriority() != null) {
             candidateToUpdate.setProdPriority(c.getProdPriority());
         }
+        if (c.getAssignedProduction() != null) {
+            candidateToUpdate.setAssignedProduction(c.getAssignedProduction());
+        }
+        if (c.getAssignedRole() != null) {
+            candidateToUpdate.setAssignedRole(c.getAssignedRole());
+        }
 
     }
 

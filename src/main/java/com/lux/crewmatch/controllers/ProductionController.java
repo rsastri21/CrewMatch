@@ -242,18 +242,14 @@ public class ProductionController {
                     continue;
                 }
                 candidateToAdd.setName(memberName);
-                candidateToAdd.setAssigned(true);
-                candidateToAdd.setProduction(production.getName());
-                candidateToAdd.setRole(production.getRoles().get(i));
+                candidateToAdd.assign(production, production.getRoles().get(i));
                 candidateToAdd.setActingInterest(false);
 
                 this.candidateRepository.save(candidateToAdd);
             } else {
                 // If the candidate already exists, set assigned property to true
                 Candidate candidateToUpdate = candidateOptional.get();
-                candidateToUpdate.setAssigned(true);
-                candidateToUpdate.setProduction(production.getName());
-                candidateToUpdate.setRole(production.getRoles().get(i));
+                candidateToUpdate.assign(production, production.getRoles().get(i));
                 this.candidateRepository.save(candidateToUpdate);
             }
         }
@@ -303,15 +299,14 @@ public class ProductionController {
 
             // Set all members who are currently assigned to unassigned
             // Purpose is to revalidate with the second iteration
-            for (String member : productionToUpdate.getMembers()) {
+            for (int i = 0; i < productionToUpdate.getMembers().size(); i++) {
+                String member = productionToUpdate.getMembers().get(i);
                 // Pull candidate from repository
                 Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
                 // Set assigned to false if candidate is present
                 if (candidateOptional.isPresent()) {
                     Candidate candidate = candidateOptional.get();
-                    candidate.setAssigned(false);
-                    candidate.setProduction(null);
-                    candidate.setRole(null);
+                    candidate.unassign(productionToUpdate, productionToUpdate.getRoles().get(i));
                     this.candidateRepository.save(candidate);
                 }
             }
@@ -330,17 +325,13 @@ public class ProductionController {
                 if (candidateOptional.isPresent()) {
                     // Set candidate assigned field to true
                     Candidate candidate = candidateOptional.get();
-                    candidate.setAssigned(true);
-                    candidate.setProduction(productionToUpdate.getName());
-                    candidate.setRole(p.getRoles().get(i));
+                    candidate.assign(productionToUpdate, p.getRoles().get(i));
                     this.candidateRepository.save(candidate);
                 } else {
                     // Candidate not present -> Create a new skeleton candidate
                     Candidate newCandidate = new Candidate();
                     newCandidate.setName(member);
-                    newCandidate.setAssigned(true);
-                    newCandidate.setProduction(productionToUpdate.getName());
-                    newCandidate.setRole(p.getRoles().get(i));
+                    newCandidate.assign(productionToUpdate, p.getRoles().get(i));
                     newCandidate.setActingInterest(false);
 
                     // Save
@@ -400,9 +391,7 @@ public class ProductionController {
         this.productionRepository.save(productionToUpdate);
 
         // Change candidate status to assigned
-        candidateToAssign.setAssigned(true);
-        candidateToAssign.setProduction(productionToUpdate.getName());
-        candidateToAssign.setRole(productionToUpdate.getRoles().get(roleIndex));
+        candidateToAssign.assign(productionToUpdate, productionToUpdate.getRoles().get(roleIndex));
         this.candidateRepository.save(candidateToAssign);
 
         return ResponseEntity.status(HttpStatus.OK).body("The candidate was assigned.");
@@ -439,9 +428,7 @@ public class ProductionController {
 
         for (int i = 0; i < production.getMembers().size(); i++) {
             if (production.getMembers().get(i).startsWith(candidate.getName()) && i == roleIndex) {
-                candidate.setAssigned(false);
-                candidate.setProduction(null);
-                candidate.setRole(null);
+                candidate.unassign(production, production.getRoles().get(i));
                 crewMembers.set(i, "");
             }
         }
