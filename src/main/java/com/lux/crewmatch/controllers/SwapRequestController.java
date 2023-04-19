@@ -161,16 +161,16 @@ public class SwapRequestController {
         Optional<Candidate> candidate1Optional = Optional.ofNullable(this.candidateRepository.findByName(member1));
         if (candidate1Optional.isPresent()) {
             Candidate candidate1 = candidate1Optional.get();
-            candidate1.setProduction(productionTwo.getName());
-            candidate1.setRole(swapRequest.getRole2());
+            candidate1.unassign(productionOne, swapRequest.getRole1());
+            candidate1.assign(productionTwo, swapRequest.getRole2());
             this.candidateRepository.save(candidate1);
         }
 
         Optional<Candidate> candidate2Optional = Optional.ofNullable(this.candidateRepository.findByName(member2));
         if (candidate2Optional.isPresent()) {
             Candidate candidate2 = candidate2Optional.get();
-            candidate2.setProduction(productionOne.getName());
-            candidate2.setRole(swapRequest.getRole1());
+            candidate2.unassign(productionTwo, swapRequest.getRole2());
+            candidate2.assign(productionOne, swapRequest.getRole1());
             this.candidateRepository.save(candidate2);
         }
 
