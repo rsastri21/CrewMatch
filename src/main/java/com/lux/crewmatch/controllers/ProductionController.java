@@ -296,6 +296,9 @@ public class ProductionController {
         if (p.getRoles() != null) {
             productionToUpdate.setRoles(p.getRoles());
         }
+        if (p.getRoleWeights() != null) {
+            productionToUpdate.setRoleWeights(p.getRoleWeights());
+        }
         if (p.getMembers() != null) {
 
             // Set all members who are currently assigned to unassigned
