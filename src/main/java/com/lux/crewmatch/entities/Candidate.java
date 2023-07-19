@@ -195,7 +195,6 @@ public class Candidate {
     }
 
     public void unassign(Production production, String role) {
-        setAssigned(false);
 
         List<String> newAssignedRoles = new ArrayList<>();
         List<String> newAssignedProductions = new ArrayList<>();
@@ -212,6 +211,7 @@ public class Candidate {
         if (newAssignedRoles.size() == 0) {
             setAssignedRole(null);
             setAssignedProduction(null);
+            setAssigned(false);
         } else {
             setAssignedRole(newAssignedRoles);
             setAssignedProduction(newAssignedProductions);
