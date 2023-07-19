@@ -1,6 +1,8 @@
 package com.lux.crewmatch.controllers;
 
 import com.lux.crewmatch.entities.Candidate;
+import com.lux.crewmatch.entities.Production;
+import com.lux.crewmatch.repositories.ProductionRepository;
 import com.lux.crewmatch.services.CSVHelper;
 import com.lux.crewmatch.message.ResponseMessage;
 import com.lux.crewmatch.repositories.CandidateRepository;
@@ -13,9 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @CrossOrigin
 @RestController
@@ -23,6 +23,7 @@ import java.util.Optional;
 public class CandidateController {
 
     private final CandidateRepository candidateRepository;
+    private final ProductionRepository productionRepository;
 
     @Autowired
     CSVService fileService;
@@ -31,9 +32,11 @@ public class CandidateController {
      * Creates an instance of the Candidate Controller to handle requests handling candidates.
      * The purpose of this constructor is to configure the proper dependency injection for Spring Boot.
      * @param candidateRepository - The CandidateRepository injected into the controller instance for repository functions.
+     * @param productionRepository - The ProductionRepository injected into the controller instance for repository functions.
      */
-    public CandidateController(CandidateRepository candidateRepository) {
+    public CandidateController(CandidateRepository candidateRepository, ProductionRepository productionRepository) {
         this.candidateRepository = candidateRepository;
+        this.productionRepository = productionRepository;
     }
 
     /**
@@ -265,6 +268,12 @@ public class CandidateController {
         }
 
         Candidate candidateToDelete = candidateToDeleteOptional.get();
+
+        // Remove candidate from their production if assigned
+        if (candidateToDelete.getAssigned()) {
+            deleteCandidateFromProduction(candidateToDelete);
+        }
+
         this.candidateRepository.delete(candidateToDelete);
     }
 
@@ -276,7 +285,63 @@ public class CandidateController {
     @DeleteMapping("/deleteAll")
     @ResponseStatus(code = HttpStatus.OK, reason = "All candidates have been deleted.")
     public void deleteAll() {
+        // Update candidate assignments
+        Iterable<Candidate> allCandidates = this.candidateRepository.findAll();
+        Iterator<Candidate> allCandidatesIterator = allCandidates.iterator();
+
+        while (allCandidatesIterator.hasNext()) {
+            Candidate candidateToDelete = allCandidatesIterator.next();
+            if (candidateToDelete.getAssigned()) {
+                deleteCandidateFromProduction(candidateToDelete);
+            }
+        }
+
         this.candidateRepository.deleteAll();
+    }
+
+    /**
+     * A helper method to remove candidates set for deletion from their productions.
+     * @param candidateToDelete - The candidate whose assignments are to be updated.
+     */
+    public void deleteCandidateFromProduction(Candidate candidateToDelete) {
+        List<String> candidateProductions = candidateToDelete.getAssignedProduction();
+
+        // Lists to keep track of which productions need to be removed
+        List<Production> productionsList = new LinkedList<>();
+        List<String> rolesList = new LinkedList<>();
+
+        for (int i = 0; i < candidateProductions.size(); i++) {
+            Optional<Production> productionToRemoveOptional = Optional.ofNullable(this.productionRepository.findByName(candidateProductions.get(i)));
+
+            if (productionToRemoveOptional.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no production with that ID.");
+            }
+
+            Production productionToRemove = productionToRemoveOptional.get();
+            productionsList.add(productionToRemove);
+
+            String roleToRemove = candidateToDelete.getAssignedRole().get(i);
+            rolesList.add(roleToRemove);
+
+            List<String> prodMembers = new ArrayList<>(productionToRemove.getMembers());
+            List<String> prodRoles = productionToRemove.getRoles();
+
+            for (int j = 0; j < productionToRemove.getMembers().size(); j++) {
+                if (prodMembers.get(j).equals(candidateToDelete.getName()) && prodRoles.get(j).equals(roleToRemove)) {
+                    prodMembers.set(j, "");
+                    productionToRemove.getRoleWeights().set(j, 1.0);
+                    productionToRemove.normalize();
+                }
+            }
+            productionToRemove.setMembers(prodMembers);
+            this.productionRepository.save(productionToRemove);
+
+        }
+
+        // Unassign all productions found
+        for (int i = 0; i < productionsList.size(); i++) {
+            candidateToDelete.unassign(productionsList.get(i), rolesList.get(i));
+        }
     }
 
 }
