@@ -166,7 +166,7 @@ public class WeightedMatchService {
             }
 
             // Find the optimal assignment
-            while (!potentialAssignments.isEmpty()) {
+            while (!potentialAssignments.isEmpty() && !candidate.getAssigned()) {
                 Assignment assignment = potentialAssignments.poll();
                 String roleToTry = assignment.getRole();
                 Production productionToTry = assignment.getProduction();
