@@ -285,17 +285,6 @@ public class CandidateController {
     @DeleteMapping("/deleteAll")
     @ResponseStatus(code = HttpStatus.OK, reason = "All candidates have been deleted.")
     public void deleteAll() {
-        // Update candidate assignments
-        Iterable<Candidate> allCandidates = this.candidateRepository.findAll();
-        Iterator<Candidate> allCandidatesIterator = allCandidates.iterator();
-
-        while (allCandidatesIterator.hasNext()) {
-            Candidate candidateToDelete = allCandidatesIterator.next();
-            if (candidateToDelete.getAssigned()) {
-                deleteCandidateFromProduction(candidateToDelete);
-            }
-        }
-
         this.candidateRepository.deleteAll();
     }
 
