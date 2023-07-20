@@ -45,6 +45,9 @@ public class Production {
     @Column(name = "PRODUCTION_LEAD")
     private String prodLead;
 
+    @Column(columnDefinition = "boolean default false")
+    private Boolean archived;
+
     public Production() {
 
     }
