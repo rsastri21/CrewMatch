@@ -264,6 +264,9 @@ public class ProductionController {
         // Normalize inputted weights
         production.normalize();
 
+        // Set archived field to false
+        production.setArchived(false);
+
         return ResponseEntity.status(HttpStatus.OK).body(this.productionRepository.save(production));
     }
 
@@ -288,6 +291,9 @@ public class ProductionController {
         // Check fields and update accordingly
         if (p.getName() != null) {
             productionToUpdate.setName(p.getName());
+        }
+        if (p.getArchived() != null) {
+            productionToUpdate.setArchived(p.getArchived());
         }
         if (p.getRoles() != null) {
             productionToUpdate.setRoles(p.getRoles());

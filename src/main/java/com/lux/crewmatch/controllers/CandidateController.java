@@ -314,7 +314,7 @@ public class CandidateController {
             Optional<Production> productionToRemoveOptional = Optional.ofNullable(this.productionRepository.findByName(candidateProductions.get(i)));
 
             if (productionToRemoveOptional.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no production with that ID.");
+                continue;
             }
 
             Production productionToRemove = productionToRemoveOptional.get();
@@ -326,22 +326,27 @@ public class CandidateController {
             // Update productions crew list
             List<String> prodMembers = new ArrayList<>(productionToRemove.getMembers());
             List<String> prodRoles = productionToRemove.getRoles();
+            List<Double> prodWeights = new ArrayList<>(productionToRemove.getRoleWeights());
 
             for (int j = 0; j < productionToRemove.getMembers().size(); j++) {
                 if (prodMembers.get(j).equals(candidateToDelete.getName()) && prodRoles.get(j).equals(roleToRemove)) {
                     prodMembers.set(j, "");
-                    productionToRemove.getRoleWeights().set(j, 1.0);
-                    productionToRemove.normalize();
+                    prodWeights.set(j, 1.0);
                 }
             }
             productionToRemove.setMembers(prodMembers);
+            productionToRemove.setRoleWeights(prodWeights);
+            productionToRemove.normalize();
             this.productionRepository.save(productionToRemove);
 
         }
 
         // Unassign all productions found
         for (int i = 0; i < productionsList.size(); i++) {
-            candidateToDelete.unassign(productionsList.get(i), rolesList.get(i));
+            try {
+                candidateToDelete.unassign(productionsList.get(i), rolesList.get(i));
+            } catch (Exception e) {
+            }
         }
     }
 
