@@ -323,6 +323,7 @@ public class CandidateController {
             String roleToRemove = candidateToDelete.getAssignedRole().get(i);
             rolesList.add(roleToRemove);
 
+            // Update productions crew list
             List<String> prodMembers = new ArrayList<>(productionToRemove.getMembers());
             List<String> prodRoles = productionToRemove.getRoles();
 
