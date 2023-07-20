@@ -133,4 +133,12 @@ public class Production {
     public void setProdLead(String prodLead) {
         this.prodLead = prodLead;
     }
+
+    public Boolean getArchived() {
+        return archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
+    }
 }
