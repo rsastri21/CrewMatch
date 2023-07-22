@@ -472,8 +472,33 @@ public class ProductionController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no production matching that id.");
         }
         Production productionToDelete = productionToDeleteOptional.get();
+        deleteCandidatesFromProduction(productionToDelete);
 
         this.productionRepository.delete(productionToDelete);
+    }
+
+    /**
+     * Helper method to unassign all candidates on a production.
+     * @param production - The production from which candidates are to be removed.
+     */
+    public void deleteCandidatesFromProduction(Production production) {
+        // Obtain candidates list to be updated
+        List<String> crewMembers = production.getMembers();
+
+        for (int i = 0; i < crewMembers.size(); i++) {
+            String member = crewMembers.get(i);
+
+            // Get the candidate from the repository
+            Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
+            if (candidateOptional.isEmpty()) {
+                continue;
+            }
+            Candidate candidate = candidateOptional.get();
+
+            // Unassign the candidate from their role on the production, so they are available for future matches
+            candidate.unassign(production, production.getRoles().get(i));
+            this.candidateRepository.save(candidate);
+        }
     }
 
     /**
