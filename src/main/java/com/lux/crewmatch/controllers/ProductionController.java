@@ -56,9 +56,17 @@ public class ProductionController {
      * @return - Returns a list containing all the productions currently stored in the production repository.
      */
     @GetMapping("/get")
-    public Iterable<Production> getAllProductions() {
+    public List<Production> getAllProductions() {
         return this.productionRepository.findByArchived(false);
     }
+
+    /**
+     * Gets all archived productions stored in the production repository.
+     * Accepts HTTP GET requests at the "./getArchived" API endpoint.
+     * @return - Returns a list containing all the archived productions currently stored in the production repository.
+     */
+    @GetMapping("/getArchived")
+    public List<Production> getAllArchivedProductions() { return this.productionRepository.findByArchived(true); }
 
     /**
      * Gets all productions that do not have an assigned production lead.
