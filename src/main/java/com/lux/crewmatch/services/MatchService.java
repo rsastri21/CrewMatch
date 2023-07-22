@@ -211,7 +211,7 @@ public class MatchService {
     }
 
     private List<String> obtainAllProductionNames() {
-        Iterable<Production> allProductions = productionRepository.findAll();
+        List<Production> allProductions = productionRepository.findByArchived(false);
         List<String> prodNames = new ArrayList<>();
         for (Production prod : allProductions) {
             prodNames.add(prod.getName());

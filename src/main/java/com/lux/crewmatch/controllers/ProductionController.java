@@ -51,13 +51,13 @@ public class ProductionController {
     }
 
     /**
-     * Gets all productions stored in the production repository.
+     * Gets all active productions stored in the production repository.
      * Accepts HTTP GET requests at the "./get" API endpoint.
-     * @return - Returns an iterable containing all the productions currently stored in the production repository.
+     * @return - Returns a list containing all the productions currently stored in the production repository.
      */
     @GetMapping("/get")
     public Iterable<Production> getAllProductions() {
-        return this.productionRepository.findAll();
+        return this.productionRepository.findByArchived(false);
     }
 
     /**
@@ -109,7 +109,7 @@ public class ProductionController {
     }
 
     /**
-     * Gets all the roles that contained within any production.
+     * Gets all the roles that contained within any active production.
      * Intended for use prior to creating the Role Interest Form, allowing all candidates
      * to select roles that are contained within a production's needs.
      * Accepts HTTP GET requests at the "./get/roles" API endpoint.
@@ -117,7 +117,7 @@ public class ProductionController {
      */
     @GetMapping("/get/roles")
     public List<String> getAllRoles() {
-        Iterable<Production> productions = this.productionRepository.findAll();
+        List<Production> productions = this.productionRepository.findByArchived(false);
 
         Set<String> roles = new HashSet<>();
         // Iterate through every production and add unique roles
@@ -141,7 +141,7 @@ public class ProductionController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There are no productions to display.");
         }
 
-        InputStreamResource fileInputStream = fileService.dataToCSV(this.productionRepository.findAll());
+        InputStreamResource fileInputStream = fileService.dataToCSV(this.productionRepository.findByArchived(false));
 
         String csvFileName = filename + ".csv";
 
