@@ -292,7 +292,7 @@ public class CandidateController {
      * A helper method to remove candidates set for deletion from their productions.
      * @param candidateToDelete - The candidate whose assignments are to be updated.
      */
-    public void deleteCandidateFromProduction(Candidate candidateToDelete) {
+    private void deleteCandidateFromProduction(Candidate candidateToDelete) {
         List<String> candidateProductions = candidateToDelete.getAssignedProduction();
 
         // Lists to keep track of which productions need to be removed

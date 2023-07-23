@@ -96,7 +96,7 @@ public class ProductionController {
      */
     @GetMapping("/getCount")
     public ResponseEntity<Integer> getNumberOfProductions() {
-        return ResponseEntity.status(HttpStatus.OK).body((int) this.productionRepository.count());
+        return ResponseEntity.status(HttpStatus.OK).body(this.productionRepository.findByArchived(false).size());
     }
 
     /**
@@ -239,6 +239,31 @@ public class ProductionController {
         }
         // Prior to saving, check if members in the production are not created candidates yet
         List<String> crew = production.getMembers();
+        validateCandidateSet(crew, production);
+
+        // Capitalize all crew member names
+        List<String> crewFormatted = new ArrayList<>(crew);
+        for (int i = 0; i < crew.size(); i++) {
+            crewFormatted.set(i, CSVHelper.formatName(crew.get(i)));
+        }
+        production.setMembers(new ArrayList<>(crewFormatted));
+
+        // Normalize inputted weights
+        production.normalize();
+
+        // Set archived field to false
+        production.setArchived(false);
+
+        return ResponseEntity.status(HttpStatus.OK).body(this.productionRepository.save(production));
+    }
+
+    /**
+     * A helper method that ensures the current candidate set is up-to-date with new candidates
+     * potentially added upon creation of a new production.
+     * @param crew - A list specifying the production crew members as strings.
+     * @param production - The production from which the crew is to be validated.
+     */
+    private void validateCandidateSet(List<String> crew, Production production) {
         for (int i = 0; i < crew.size(); i++) {
             String member = crew.get(i);
             // See if candidate exists, create an entry if not
@@ -261,21 +286,6 @@ public class ProductionController {
                 this.candidateRepository.save(candidateToUpdate);
             }
         }
-
-        // Capitalize all crew member names
-        List<String> crewFormatted = new ArrayList<>(crew);
-        for (int i = 0; i < crew.size(); i++) {
-            crewFormatted.set(i, CSVHelper.formatName(crew.get(i)));
-        }
-        production.setMembers(new ArrayList<>(crewFormatted));
-
-        // Normalize inputted weights
-        production.normalize();
-
-        // Set archived field to false
-        production.setArchived(false);
-
-        return ResponseEntity.status(HttpStatus.OK).body(this.productionRepository.save(production));
     }
 
     /**
@@ -472,10 +482,33 @@ public class ProductionController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no production matching that id.");
         }
         Production productionToArchive = productionToArchiveOptional.get();
+        // No need to do anything if production is already archived
+        if (productionToArchive.getArchived()) {
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "The production is already archived.");
+        }
+
         deleteCandidatesFromProduction(productionToArchive);
 
         productionToArchive.setArchived(true);
         this.productionRepository.save(productionToArchive);
+    }
+
+    @PutMapping("/restore/{id}")
+    @ResponseStatus(code = HttpStatus.ACCEPTED, reason = "The production has been restored from the archive.")
+    public void restoreProduction(@PathVariable("id") Integer id) {
+        Optional<Production> productionToRestoreOptional = this.productionRepository.findById(id);
+
+        if (productionToRestoreOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no production matching that id.");
+        }
+        Production productionToRestore = productionToRestoreOptional.get();
+
+        // Reinitialize crew members
+        validateCandidateSet(productionToRestore.getMembers(), productionToRestore);
+
+        // Update production parameters and save
+        productionToRestore.setArchived(false);
+        this.productionRepository.save(productionToRestore);
     }
 
     /**
@@ -502,7 +535,7 @@ public class ProductionController {
      * Helper method to unassign all candidates on a production.
      * @param production - The production from which candidates are to be removed.
      */
-    public void deleteCandidatesFromProduction(Production production) {
+    private void deleteCandidatesFromProduction(Production production) {
         // Obtain candidates list to be updated
         List<String> crewMembers = production.getMembers();
 
