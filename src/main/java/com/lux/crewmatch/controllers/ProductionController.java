@@ -493,6 +493,11 @@ public class ProductionController {
         this.productionRepository.save(productionToArchive);
     }
 
+    /**
+     * Restores a production from the archive and validates that all candidates on that archived production
+     * are present. These candidates will be created if they are not present to ensure a valid candidate set.
+     * @param id - An integer representing the ID of the production to be restored.
+     */
     @PutMapping("/restore/{id}")
     @ResponseStatus(code = HttpStatus.ACCEPTED, reason = "The production has been restored from the archive.")
     public void restoreProduction(@PathVariable("id") Integer id) {
@@ -502,6 +507,9 @@ public class ProductionController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no production matching that id.");
         }
         Production productionToRestore = productionToRestoreOptional.get();
+        if (!productionToRestore.getArchived()) {
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "The production is not archived.");
+        }
 
         // Reinitialize crew members
         validateCandidateSet(productionToRestore.getMembers(), productionToRestore);
