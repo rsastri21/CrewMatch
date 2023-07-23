@@ -494,6 +494,25 @@ public class ProductionController {
     }
 
     /**
+     * Archives all productions and removes all candidates matched to them.
+     * Accepts HTTP PUT requests at the "./archiveALl" API endpoint.
+     * Returns a 200 OK response if the request is successful.
+     */
+    @PutMapping("/archiveAll")
+    @ResponseStatus(code = HttpStatus.OK, reason = "All productions have been archived.")
+    public void archiveAllProductions() {
+        // Get all active productions
+        List<Production> productionsList = this.productionRepository.findByArchived(false);
+
+        // Remove candidates and set archived flag for each production
+        for (Production production : productionsList) {
+            deleteCandidatesFromProduction(production);
+            production.setArchived(true);
+            this.productionRepository.save(production);
+        }
+    }
+
+    /**
      * Restores a production from the archive and validates that all candidates on that archived production
      * are present. These candidates will be created if they are not present to ensure a valid candidate set.
      * @param id - An integer representing the ID of the production to be restored.
