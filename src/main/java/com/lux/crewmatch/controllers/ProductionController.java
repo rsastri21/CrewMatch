@@ -458,6 +458,27 @@ public class ProductionController {
     }
 
     /**
+     * Archives a production and removes all members allowing them to be assigned to other productions.
+     * Accepts HTTP PUT requests at the "./archive/{id}" API endpoint.
+     * @param id - An integer identifying the production to be archived.
+     * Returns a response code of OK if the archive was successful.
+     */
+    @PutMapping("/archive/{id}")
+    @ResponseStatus(code = HttpStatus.OK, reason = "The production has been archived.")
+    public void archiveProduction(@PathVariable("id") Integer id) {
+        Optional<Production> productionToArchiveOptional = this.productionRepository.findById(id);
+
+        if (productionToArchiveOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no production matching that id.");
+        }
+        Production productionToArchive = productionToArchiveOptional.get();
+        deleteCandidatesFromProduction(productionToArchive);
+
+        productionToArchive.setArchived(true);
+        this.productionRepository.save(productionToArchive);
+    }
+
+    /**
      * Deletes a production according to a specified ID. Throws a bad request exception if there is no matching production.
      * Accepts HTTP DELETE requests at the "./delete/{id}" API endpoint.
      * @param id - An integer identifying the production to be deleted provided as a path variable.
