@@ -118,9 +118,7 @@ public class MatchService {
                 for (String role : new ArrayList<>(productionToTry.getRoles())) {
                     if (productionToTry.place(candidate, role)) {
                         numCandidatesAssigned++;
-                        candidate.setAssigned(true);
-                        candidate.setRole(role);
-                        candidate.setProduction(productionToTry.getName());
+                        candidate.assign(productionToTry, role);
                         productionRepository.save(productionToTry);
                         candidateRepository.save(candidate);
                         break;
@@ -157,9 +155,7 @@ public class MatchService {
             for (String role : rolesToUse) {
                 if (productionToTry.place(candidate, role)) {
                     numCandidatesAssigned++;
-                    candidate.setAssigned(true);
-                    candidate.setRole(role);
-                    candidate.setProduction(productionToTry.getName());
+                    candidate.assign(productionToTry, role);
                     productionRepository.save(productionToTry);
                     candidateRepository.save(candidate);
                     break;
@@ -192,9 +188,7 @@ public class MatchService {
                 // Attempt to place with the given role
                 if (productionToTry.place(candidate, role)) {
                     numCandidatesAssigned++;
-                    candidate.setAssigned(true);
-                    candidate.setRole(role);
-                    candidate.setProduction(productionToTry.getName());
+                    candidate.assign(productionToTry, role);
                     productionRepository.save(productionToTry);
                     candidateRepository.save(candidate);
                     break;
@@ -217,7 +211,7 @@ public class MatchService {
     }
 
     private List<String> obtainAllProductionNames() {
-        Iterable<Production> allProductions = productionRepository.findAll();
+        List<Production> allProductions = productionRepository.findByArchived(false);
         List<String> prodNames = new ArrayList<>();
         for (Production prod : allProductions) {
             prodNames.add(prod.getName());

@@ -8,6 +8,7 @@ import com.lux.crewmatch.entities.Production;
 import com.lux.crewmatch.repositories.SwapRequestRepository;
 import com.lux.crewmatch.services.CSVService;
 import com.lux.crewmatch.services.MatchService;
+import com.lux.crewmatch.services.WeightedMatchService;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -33,6 +34,9 @@ public class ProductionController {
     MatchService matchService;
 
     @Autowired
+    WeightedMatchService weightedMatchService;
+
+    @Autowired
     CSVService fileService;
 
     /**
@@ -47,14 +51,22 @@ public class ProductionController {
     }
 
     /**
-     * Gets all productions stored in the production repository.
+     * Gets all active productions stored in the production repository.
      * Accepts HTTP GET requests at the "./get" API endpoint.
-     * @return - Returns an iterable containing all the productions currently stored in the production repository.
+     * @return - Returns a list containing all the productions currently stored in the production repository.
      */
     @GetMapping("/get")
-    public Iterable<Production> getAllProductions() {
-        return this.productionRepository.findAll();
+    public List<Production> getAllProductions() {
+        return this.productionRepository.findByArchived(false);
     }
+
+    /**
+     * Gets all archived productions stored in the production repository.
+     * Accepts HTTP GET requests at the "./getArchived" API endpoint.
+     * @return - Returns a list containing all the archived productions currently stored in the production repository.
+     */
+    @GetMapping("/getArchived")
+    public List<Production> getAllArchivedProductions() { return this.productionRepository.findByArchived(true); }
 
     /**
      * Gets all productions that do not have an assigned production lead.
@@ -84,7 +96,7 @@ public class ProductionController {
      */
     @GetMapping("/getCount")
     public ResponseEntity<Integer> getNumberOfProductions() {
-        return ResponseEntity.status(HttpStatus.OK).body((int) this.productionRepository.count());
+        return ResponseEntity.status(HttpStatus.OK).body(this.productionRepository.findByArchived(false).size());
     }
 
     /**
@@ -105,7 +117,7 @@ public class ProductionController {
     }
 
     /**
-     * Gets all the roles that contained within any production.
+     * Gets all the roles that contained within any active production.
      * Intended for use prior to creating the Role Interest Form, allowing all candidates
      * to select roles that are contained within a production's needs.
      * Accepts HTTP GET requests at the "./get/roles" API endpoint.
@@ -113,7 +125,7 @@ public class ProductionController {
      */
     @GetMapping("/get/roles")
     public List<String> getAllRoles() {
-        Iterable<Production> productions = this.productionRepository.findAll();
+        List<Production> productions = this.productionRepository.findByArchived(false);
 
         Set<String> roles = new HashSet<>();
         // Iterate through every production and add unique roles
@@ -137,7 +149,7 @@ public class ProductionController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There are no productions to display.");
         }
 
-        InputStreamResource fileInputStream = fileService.dataToCSV(this.productionRepository.findAll());
+        InputStreamResource fileInputStream = fileService.dataToCSV(this.productionRepository.findByArchived(false));
 
         String csvFileName = filename + ".csv";
 
@@ -180,6 +192,17 @@ public class ProductionController {
     }
 
     /**
+     * Matches candidates to productions taking the role weightings into consideration.
+     * Accepts HTTP GET requests at the "./weightedMatch" API endpoint.
+     * @return - Returns a ResponseEntity with a message containing how many candidates were matched and how many
+     * remain to be matched. Returns an error message if there are no candidates or no productions to match.
+     */
+    @GetMapping("/weightedMatch")
+    public ResponseEntity<String> weightedMatchCandidatesToProductions() {
+        return weightedMatchService.weightedMatch();
+    }
+
+    /**
      * Searches for productions by name. Throws a bad request exception if no production matches the name entered.
      * Accepts HTTP GET requests at the "./search" API endpoint.
      * @param name - A string entered as a query parameter that specifies the production to find.
@@ -210,8 +233,37 @@ public class ProductionController {
         if (production.getMembers().size() != production.getRoles().size()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Roles and Members lists must be the same length.");
         }
+        // Ensure that the weights list is provided
+        if (production.getRoleWeights() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No weights have been provided for the roles list.");
+        }
         // Prior to saving, check if members in the production are not created candidates yet
         List<String> crew = production.getMembers();
+        validateCandidateSet(crew, production);
+
+        // Capitalize all crew member names
+        List<String> crewFormatted = new ArrayList<>(crew);
+        for (int i = 0; i < crew.size(); i++) {
+            crewFormatted.set(i, CSVHelper.formatName(crew.get(i)));
+        }
+        production.setMembers(new ArrayList<>(crewFormatted));
+
+        // Normalize inputted weights
+        production.normalize();
+
+        // Set archived field to false
+        production.setArchived(false);
+
+        return ResponseEntity.status(HttpStatus.OK).body(this.productionRepository.save(production));
+    }
+
+    /**
+     * A helper method that ensures the current candidate set is up-to-date with new candidates
+     * potentially added upon creation of a new production.
+     * @param crew - A list specifying the production crew members as strings.
+     * @param production - The production from which the crew is to be validated.
+     */
+    private void validateCandidateSet(List<String> crew, Production production) {
         for (int i = 0; i < crew.size(); i++) {
             String member = crew.get(i);
             // See if candidate exists, create an entry if not
@@ -223,30 +275,17 @@ public class ProductionController {
                     continue;
                 }
                 candidateToAdd.setName(memberName);
-                candidateToAdd.setAssigned(true);
-                candidateToAdd.setProduction(production.getName());
-                candidateToAdd.setRole(production.getRoles().get(i));
+                candidateToAdd.assign(production, production.getRoles().get(i));
                 candidateToAdd.setActingInterest(false);
 
                 this.candidateRepository.save(candidateToAdd);
             } else {
                 // If the candidate already exists, set assigned property to true
                 Candidate candidateToUpdate = candidateOptional.get();
-                candidateToUpdate.setAssigned(true);
-                candidateToUpdate.setProduction(production.getName());
-                candidateToUpdate.setRole(production.getRoles().get(i));
+                candidateToUpdate.assign(production, production.getRoles().get(i));
                 this.candidateRepository.save(candidateToUpdate);
             }
         }
-
-        // Capitalize all crew member names
-        List<String> crewFormatted = new ArrayList<>(crew);
-        for (int i = 0; i < crew.size(); i++) {
-            crewFormatted.set(i, CSVHelper.formatName(crew.get(i)));
-        }
-        production.setMembers(new ArrayList<>(crewFormatted));
-
-        return ResponseEntity.status(HttpStatus.OK).body(this.productionRepository.save(production));
     }
 
     /**
@@ -271,22 +310,27 @@ public class ProductionController {
         if (p.getName() != null) {
             productionToUpdate.setName(p.getName());
         }
+        if (p.getArchived() != null) {
+            productionToUpdate.setArchived(p.getArchived());
+        }
         if (p.getRoles() != null) {
             productionToUpdate.setRoles(p.getRoles());
+        }
+        if (p.getRoleWeights() != null) {
+            productionToUpdate.setRoleWeights(p.getRoleWeights());
         }
         if (p.getMembers() != null) {
 
             // Set all members who are currently assigned to unassigned
             // Purpose is to revalidate with the second iteration
-            for (String member : productionToUpdate.getMembers()) {
+            for (int i = 0; i < productionToUpdate.getMembers().size(); i++) {
+                String member = productionToUpdate.getMembers().get(i);
                 // Pull candidate from repository
                 Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
                 // Set assigned to false if candidate is present
                 if (candidateOptional.isPresent()) {
                     Candidate candidate = candidateOptional.get();
-                    candidate.setAssigned(false);
-                    candidate.setProduction(null);
-                    candidate.setRole(null);
+                    candidate.unassign(productionToUpdate, productionToUpdate.getRoles().get(i));
                     this.candidateRepository.save(candidate);
                 }
             }
@@ -305,17 +349,13 @@ public class ProductionController {
                 if (candidateOptional.isPresent()) {
                     // Set candidate assigned field to true
                     Candidate candidate = candidateOptional.get();
-                    candidate.setAssigned(true);
-                    candidate.setProduction(productionToUpdate.getName());
-                    candidate.setRole(p.getRoles().get(i));
+                    candidate.assign(productionToUpdate, p.getRoles().get(i));
                     this.candidateRepository.save(candidate);
                 } else {
                     // Candidate not present -> Create a new skeleton candidate
                     Candidate newCandidate = new Candidate();
                     newCandidate.setName(member);
-                    newCandidate.setAssigned(true);
-                    newCandidate.setProduction(productionToUpdate.getName());
-                    newCandidate.setRole(p.getRoles().get(i));
+                    newCandidate.assign(productionToUpdate, p.getRoles().get(i));
                     newCandidate.setActingInterest(false);
 
                     // Save
@@ -375,9 +415,7 @@ public class ProductionController {
         this.productionRepository.save(productionToUpdate);
 
         // Change candidate status to assigned
-        candidateToAssign.setAssigned(true);
-        candidateToAssign.setProduction(productionToUpdate.getName());
-        candidateToAssign.setRole(productionToUpdate.getRoles().get(roleIndex));
+        candidateToAssign.assign(productionToUpdate, productionToUpdate.getRoles().get(roleIndex));
         this.candidateRepository.save(candidateToAssign);
 
         return ResponseEntity.status(HttpStatus.OK).body("The candidate was assigned.");
@@ -414,9 +452,7 @@ public class ProductionController {
 
         for (int i = 0; i < production.getMembers().size(); i++) {
             if (production.getMembers().get(i).startsWith(candidate.getName()) && i == roleIndex) {
-                candidate.setAssigned(false);
-                candidate.setProduction(null);
-                candidate.setRole(null);
+                candidate.unassign(production, production.getRoles().get(i));
                 crewMembers.set(i, "");
             }
         }
@@ -429,6 +465,77 @@ public class ProductionController {
 
         return ResponseEntity.status(HttpStatus.OK).body("The member was removed.");
 
+    }
+
+    /**
+     * Archives a production and removes all members allowing them to be assigned to other productions.
+     * Accepts HTTP PUT requests at the "./archive/{id}" API endpoint.
+     * @param id - An integer identifying the production to be archived.
+     * Returns a response code of OK if the archive was successful.
+     */
+    @PutMapping("/archive/{id}")
+    @ResponseStatus(code = HttpStatus.OK, reason = "The production has been archived.")
+    public void archiveProduction(@PathVariable("id") Integer id) {
+        Optional<Production> productionToArchiveOptional = this.productionRepository.findById(id);
+
+        if (productionToArchiveOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no production matching that id.");
+        }
+        Production productionToArchive = productionToArchiveOptional.get();
+        // No need to do anything if production is already archived
+        if (productionToArchive.getArchived()) {
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "The production is already archived.");
+        }
+
+        deleteCandidatesFromProduction(productionToArchive);
+
+        productionToArchive.setArchived(true);
+        this.productionRepository.save(productionToArchive);
+    }
+
+    /**
+     * Archives all productions and removes all candidates matched to them.
+     * Accepts HTTP PUT requests at the "./archiveALl" API endpoint.
+     * Returns a 200 OK response if the request is successful.
+     */
+    @PutMapping("/archiveAll")
+    @ResponseStatus(code = HttpStatus.OK, reason = "All productions have been archived.")
+    public void archiveAllProductions() {
+        // Get all active productions
+        List<Production> productionsList = this.productionRepository.findByArchived(false);
+
+        // Remove candidates and set archived flag for each production
+        for (Production production : productionsList) {
+            deleteCandidatesFromProduction(production);
+            production.setArchived(true);
+            this.productionRepository.save(production);
+        }
+    }
+
+    /**
+     * Restores a production from the archive and validates that all candidates on that archived production
+     * are present. These candidates will be created if they are not present to ensure a valid candidate set.
+     * @param id - An integer representing the ID of the production to be restored.
+     */
+    @PutMapping("/restore/{id}")
+    @ResponseStatus(code = HttpStatus.ACCEPTED, reason = "The production has been restored from the archive.")
+    public void restoreProduction(@PathVariable("id") Integer id) {
+        Optional<Production> productionToRestoreOptional = this.productionRepository.findById(id);
+
+        if (productionToRestoreOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no production matching that id.");
+        }
+        Production productionToRestore = productionToRestoreOptional.get();
+        if (!productionToRestore.getArchived()) {
+            throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "The production is not archived.");
+        }
+
+        // Reinitialize crew members
+        validateCandidateSet(productionToRestore.getMembers(), productionToRestore);
+
+        // Update production parameters and save
+        productionToRestore.setArchived(false);
+        this.productionRepository.save(productionToRestore);
     }
 
     /**
@@ -446,8 +553,33 @@ public class ProductionController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no production matching that id.");
         }
         Production productionToDelete = productionToDeleteOptional.get();
+        deleteCandidatesFromProduction(productionToDelete);
 
         this.productionRepository.delete(productionToDelete);
+    }
+
+    /**
+     * Helper method to unassign all candidates on a production.
+     * @param production - The production from which candidates are to be removed.
+     */
+    private void deleteCandidatesFromProduction(Production production) {
+        // Obtain candidates list to be updated
+        List<String> crewMembers = production.getMembers();
+
+        for (int i = 0; i < crewMembers.size(); i++) {
+            String member = crewMembers.get(i);
+
+            // Get the candidate from the repository
+            Optional<Candidate> candidateOptional = Optional.ofNullable(this.candidateRepository.findByName(member));
+            if (candidateOptional.isEmpty()) {
+                continue;
+            }
+            Candidate candidate = candidateOptional.get();
+
+            // Unassign the candidate from their role on the production, so they are available for future matches
+            candidate.unassign(production, production.getRoles().get(i));
+            this.candidateRepository.save(candidate);
+        }
     }
 
     /**

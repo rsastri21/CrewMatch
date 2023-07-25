@@ -2,7 +2,9 @@ package com.lux.crewmatch.entities;
 
 import jakarta.persistence.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "PRODUCTIONS")
@@ -26,6 +28,14 @@ public class Production {
 
     @ElementCollection
     @CollectionTable(
+            name = "PROD_ROLE_WEIGHTS",
+            joinColumns = @JoinColumn(name = "id", referencedColumnName = "id")
+    )
+    @Column(name = "ROLE_WEIGHTS")
+    private List<Double> roleWeights;
+
+    @ElementCollection
+    @CollectionTable(
             name = "PRODUCTION_MEMBERS",
             joinColumns = @JoinColumn(name = "id", referencedColumnName = "id")
     )
@@ -34,6 +44,9 @@ public class Production {
 
     @Column(name = "PRODUCTION_LEAD")
     private String prodLead;
+
+    @Column(name = "ARCHIVED")
+    private Boolean archived;
 
     public Production() {
 
@@ -57,6 +70,18 @@ public class Production {
             }
         }
         return false;
+    }
+
+    // Normalize the weights of the role list
+    public void normalize() {
+        double total = 0;
+        for (Double num : roleWeights) {
+            total += num;
+        }
+        for (int i = 0; i < roleWeights.size(); i++) {
+            // Set each position to the normed value
+            roleWeights.set(i, roleWeights.get(i) / total * 10);
+        }
     }
 
     // Getters and Setters
@@ -84,6 +109,15 @@ public class Production {
         this.roles = roles;
     }
 
+    public List<Double> getRoleWeights() {
+        return roleWeights;
+    }
+
+    public void setRoleWeights(List<Double> roleWeights) {
+        this.roleWeights = roleWeights;
+        this.normalize();
+    }
+
     public List<String> getMembers() {
         return members;
     }
@@ -98,5 +132,13 @@ public class Production {
 
     public void setProdLead(String prodLead) {
         this.prodLead = prodLead;
+    }
+
+    public Boolean getArchived() {
+        return archived;
+    }
+
+    public void setArchived(Boolean archived) {
+        this.archived = archived;
     }
 }
