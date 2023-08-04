@@ -138,18 +138,28 @@ public class ProductionController {
 
     /**
      * Exports the data of all production assignments to CSV format.
-     * Accepts HTTP GET requests at the "./getCSV/{filename}" API endpoint.
+     * Accepts HTTP GET requests at the "./getCSV" API endpoint.
      * @param filename - A string path variable describing the name of the output file.
+     * @param includeArchive - A boolean indicating whether to include archived productions.
      * @return - Returns a CSV file with the assignment data.
      */
-    @GetMapping("/getCSV/{filename}")
-    public ResponseEntity<Resource> convertToCSV(@PathVariable("filename") String filename) {
+    @GetMapping("/getCSV")
+    public ResponseEntity<Resource> convertToCSV(@RequestParam(name = "filename") String filename,
+                                                 @RequestParam(name = "includeArchive", required = false) Boolean includeArchive) {
         // Check that productions exist
         if (this.productionRepository.count() == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There are no productions to display.");
         }
 
-        InputStreamResource fileInputStream = fileService.dataToCSV(this.productionRepository.findByArchived(false));
+        // Get appropriate list of productions to output.
+        Iterable<Production> productionsList;
+        if (includeArchive != null && includeArchive) {
+            productionsList = this.productionRepository.findAll();
+        } else {
+            productionsList = this.productionRepository.findByArchived(false);
+        }
+
+        InputStreamResource fileInputStream = fileService.dataToCSV(productionsList);
 
         String csvFileName = filename + ".csv";
 

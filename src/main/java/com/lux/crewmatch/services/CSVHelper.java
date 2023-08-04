@@ -130,7 +130,11 @@ public class CSVHelper {
         Arrays.fill(productionHeaders, "");
 
         for (int i = 0; i < productions.size(); i++) {
-            productionNames[3 * i] = productions.get(i).getName();
+            if (productions.get(i).getArchived()) {
+                productionNames[3 * i] = productions.get(i).getName() + " (Archived)";
+            } else {
+                productionNames[3 * i] = productions.get(i).getName();
+            }
             productionHeaders[3 * i] = "Role";
             productionHeaders[3 * i + 1] = "Member";
         }
