@@ -40,11 +40,20 @@ public class MatchService {
         numProductions = (int) this.productionRepository.count();
 
         PriorityQueue<Candidate> orderedCandidates = new PriorityQueue<>(new CandidateComparator());
-        orderedCandidates.addAll(candidateList);
+        for (Candidate candidate : candidateList) {
+            if (candidate.isComplete()) {
+                orderedCandidates.add(candidate);
+            }
+        }
 
         // Iterate through candidate in sorted order
         while (!orderedCandidates.isEmpty()) {
             Candidate candidate = orderedCandidates.poll();
+
+            // Skip the candidate if it does not contain all required fields to match
+            if (!candidate.isComplete()) {
+                continue;
+            }
 
             if (candidate.getProdPriority()) {
                 // True when candidate prefers to be placed on desired production over role.
@@ -79,10 +88,19 @@ public class MatchService {
 
         // Initialize ordered candidate list
         PriorityQueue<Candidate> orderedCandidates = new PriorityQueue<>(new CandidateComparator());
-        orderedCandidates.addAll(candidateList);
+        for (Candidate candidate : candidateList) {
+            if (candidate.isComplete()) {
+                orderedCandidates.add(candidate);
+            }
+        }
 
         while (!orderedCandidates.isEmpty()) {
             Candidate candidate = orderedCandidates.poll();
+
+            // Skip the candidate if it does not contain all required fields to match
+            if (!candidate.isComplete()) {
+                continue;
+            }
 
             // Based on production priority, assign candidate to any role in their top productions
             // or any production with their top roles
@@ -99,7 +117,11 @@ public class MatchService {
         // Last resort --> Nothing available that fits the candidates' choices
         // Start by rechecking for candidates that are unmatched
         candidateList = new ArrayList<>(this.candidateRepository.findByAssignedFalseAndActingInterestFalse());
-        orderedCandidates.addAll(candidateList);
+        for (Candidate candidate : candidateList) {
+            if (candidate.isComplete()) {
+                orderedCandidates.add(candidate);
+            }
+        }
 
         while (!orderedCandidates.isEmpty()) {
             Candidate candidate = orderedCandidates.poll();

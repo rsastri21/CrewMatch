@@ -217,4 +217,15 @@ public class Candidate {
             setAssignedProduction(newAssignedProductions);
         }
     }
+
+    /**
+     * A helper method to determine if the candidate has all required fields for matching.
+     * @return - Returns a boolean indicating whether all conditions are met.
+     */
+    public boolean isComplete() {
+        return this.getName() != null && this.getQuartersInLux() != null && this.getYearsInUW() != null &&
+                this.getProdPriority() != null && this.getAssigned() != null && this.getActingInterest() != null &&
+                this.getTimestamp() != null;
+
+    }
 }

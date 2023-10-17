@@ -44,11 +44,20 @@ public class WeightedMatchService {
         numProductions = (int) this.productionRepository.count();
 
         PriorityQueue<Candidate> orderedCandidates = new PriorityQueue<>(new CandidateComparator());
-        orderedCandidates.addAll(candidateList);
+        for (Candidate candidate : candidateList) {
+            if (candidate.isComplete()) {
+                orderedCandidates.add(candidate);
+            }
+        }
 
         // Iterate candidates in sorted order
         while (!orderedCandidates.isEmpty()) {
             Candidate candidate = orderedCandidates.poll();
+
+            // Skip the candidate if it does not contain all required fields to match
+            if (!candidate.isComplete()) {
+                continue;
+            }
 
             if (candidate.getProdPriority()) {
                 numCandidatesAssigned += assignToProductionWithWeightedProductionBias(candidate, new ArrayList<>(candidate.getRoles()));
