@@ -37,7 +37,8 @@ public class MatchService {
         // - If there are no candidates or no productions, the matching algorithm should not commence.
         ResponseEntity<String> EXPECTATION_FAILED = getStringResponseEntity(candidateList);
         if (EXPECTATION_FAILED != null) return EXPECTATION_FAILED;
-        numProductions = (int) this.productionRepository.count();
+        List<Production> productionList = this.productionRepository.findByArchived(false);
+        numProductions = productionList.size();
 
         PriorityQueue<Candidate> orderedCandidates = new PriorityQueue<>(new CandidateComparator());
         for (Candidate candidate : candidateList) {
