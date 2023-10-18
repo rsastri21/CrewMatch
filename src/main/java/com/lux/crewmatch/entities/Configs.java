@@ -3,8 +3,8 @@ package com.lux.crewmatch.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "CONFIG")
-public class Config {
+@Table(name = "CONFIGURATIONS")
+public class Configs {
 
     // Fields
     @Id
@@ -14,10 +14,10 @@ public class Config {
     @Column(name = "NAME")
     private String name;
 
-    @Column(name = "VALUE")
+    @Column(name = "CONFIG_VALUE")
     private Integer value;
 
-    public Config () {
+    public Configs () {
 
     }
 
