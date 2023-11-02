@@ -41,14 +41,24 @@ public class WeightedMatchService {
         // - If there are no candidates or no productions, the matching algorithm should not commence.
         ResponseEntity<String> EXPECTATION_FAILED = getStringResponseEntity(candidateList);
         if (EXPECTATION_FAILED != null) return EXPECTATION_FAILED;
-        numProductions = (int) this.productionRepository.count();
+        List<Production> productionList = this.productionRepository.findByArchived(false);
+        numProductions = productionList.size();
 
         PriorityQueue<Candidate> orderedCandidates = new PriorityQueue<>(new CandidateComparator());
-        orderedCandidates.addAll(candidateList);
+        for (Candidate candidate : candidateList) {
+            if (candidate.isComplete()) {
+                orderedCandidates.add(candidate);
+            }
+        }
 
         // Iterate candidates in sorted order
         while (!orderedCandidates.isEmpty()) {
             Candidate candidate = orderedCandidates.poll();
+
+            // Skip the candidate if it does not contain all required fields to match
+            if (!candidate.isComplete()) {
+                continue;
+            }
 
             if (candidate.getProdPriority()) {
                 numCandidatesAssigned += assignToProductionWithWeightedProductionBias(candidate, new ArrayList<>(candidate.getRoles()));

@@ -323,12 +323,6 @@ public class ProductionController {
         if (p.getArchived() != null) {
             productionToUpdate.setArchived(p.getArchived());
         }
-        if (p.getRoles() != null) {
-            productionToUpdate.setRoles(p.getRoles());
-        }
-        if (p.getRoleWeights() != null) {
-            productionToUpdate.setRoleWeights(p.getRoleWeights());
-        }
         if (p.getMembers() != null) {
 
             // Set all members who are currently assigned to unassigned
@@ -375,6 +369,12 @@ public class ProductionController {
 
             productionToUpdate.setMembers(members);
 
+        }
+        if (p.getRoles() != null) {
+            productionToUpdate.setRoles(p.getRoles());
+        }
+        if (p.getRoleWeights() != null) {
+            productionToUpdate.setRoleWeights(p.getRoleWeights());
         }
 
         return this.productionRepository.save(productionToUpdate);
