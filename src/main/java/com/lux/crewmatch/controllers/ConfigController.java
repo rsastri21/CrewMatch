@@ -23,11 +23,20 @@ public class ConfigController {
     @GetMapping("/getByName")
     public ResponseEntity<Configs> getConfigByName(@RequestParam(name = "name") String name) {
         Optional<Configs> configOptional = Optional.ofNullable(this.configRepository.findByName(name));
-        if (configOptional.isEmpty()) {
+        if (configOptional.isEmpty() && name.equals("maxCrewSize")) {
             Configs config = new Configs();
-            config.setName("maxCrewSize");
+            config.setName(name);
             config.setValue(24);
             return ResponseEntity.status(HttpStatus.OK).body(config);
+        }
+        if (configOptional.isEmpty() && name.equals("isRegistrationOpen")) {
+            Configs config = new Configs();
+            config.setName(name);
+            config.setValue(0);
+            return ResponseEntity.status(HttpStatus.OK).body(config);
+        }
+        if (configOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no config variable with that name.");
         }
         Configs config = configOptional.get();
 
