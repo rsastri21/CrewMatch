@@ -75,7 +75,7 @@ public class ProductionController {
      */
     @GetMapping("/getNoLead")
     public List<Production> getProductionsNoLead() {
-        return this.productionRepository.findByProdLeadIsNull();
+        return this.productionRepository.findByProdLeadIsNullAndArchivedFalse();
     }
 
     /**
@@ -500,6 +500,7 @@ public class ProductionController {
         deleteCandidatesFromProduction(productionToArchive);
 
         productionToArchive.setArchived(true);
+        productionToArchive.setProdLead(null);
         this.productionRepository.save(productionToArchive);
     }
 
@@ -518,6 +519,7 @@ public class ProductionController {
         for (Production production : productionsList) {
             deleteCandidatesFromProduction(production);
             production.setArchived(true);
+            production.setProdLead(null);
             this.productionRepository.save(production);
         }
     }
