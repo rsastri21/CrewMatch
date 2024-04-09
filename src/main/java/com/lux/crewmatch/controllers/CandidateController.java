@@ -277,6 +277,20 @@ public class CandidateController {
         this.candidateRepository.delete(candidateToDelete);
     }
 
+    /*
+     * Deletes all the candidates that are not currently assigned to a production. A successful deletion returns a
+     * response code of OK and a message confirming the action.
+     * Accepts HTTP DELETE requests at the "./deleteUnassigned" API endpoint.
+     */
+    @DeleteMapping("/deleteUnassigned")
+    @ResponseStatus(code = HttpStatus.OK, reason = "All candidates not assigned have been deleted.")
+    public void deleteUnassignedCandidates() {
+        List<Candidate> candidatesToDelete = this.candidateRepository.findByAssignedFalse();
+        for (Candidate candidate : candidatesToDelete) {
+            this.candidateRepository.delete(candidate);
+        }
+    }
+
     /**
      * Deletes all the candidates in the repository. A successful deletion returns a response code of OK and a message
      * indicating that all candidates have been deleted.
