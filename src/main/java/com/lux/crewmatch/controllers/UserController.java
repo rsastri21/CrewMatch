@@ -106,7 +106,7 @@ public class UserController {
         if (!validPassword) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "The username and password do not match.");
         }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new String[]{ userToLogin.getRole(), userToLogin.getLeads() });
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new String[]{ userToLogin.getName(), userToLogin.getRole(), userToLogin.getLeads() });
 
     }
 
