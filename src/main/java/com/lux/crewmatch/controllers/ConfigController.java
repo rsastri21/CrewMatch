@@ -33,14 +33,14 @@ public class ConfigController {
             Configs config = new Configs();
             config.setName(name);
             config.setValue(0);
-            return ResponseEntity.status(HttpStatus.OK).body(config);
+            return ResponseEntity.status(HttpStatus.OK).body(this.configRepository.save(config));
         }
         if (configOptional.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no config variable with that name.");
         }
         Configs config = configOptional.get();
 
-        return ResponseEntity.status(HttpStatus.OK).body(config);
+        return ResponseEntity.status(HttpStatus.OK).body(this.configRepository.save(config));
     }
 
     @PostMapping("/update")

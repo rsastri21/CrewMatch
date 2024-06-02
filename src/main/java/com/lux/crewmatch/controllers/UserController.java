@@ -53,6 +53,11 @@ public class UserController {
         // Create and store new user
         User userToRegister = new User();
 
+        if (user.getName() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name was not provided.");
+        }
+        userToRegister.setName(user.getName());
+
         if (user.getUsername() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username was not provided.");
         }
@@ -101,14 +106,15 @@ public class UserController {
         if (!validPassword) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "The username and password do not match.");
         }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new String[]{ userToLogin.getRole(), userToLogin.getLeads() });
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new String[]{ userToLogin.getName(), userToLogin.getRole(), userToLogin.getLeads() });
 
     }
 
-    // Update a user - Should only be used to update the role of a user
+    // Update a user - Should only be used to update the role of a user unless being done via API
     @PutMapping("/update")
     public ResponseEntity<String> updateUser(@RequestParam(name = "username") String username,
-                                             @RequestParam(name = "role") String role) {
+                                             @RequestParam(name = "role", required = false) String role,
+                                             @RequestParam(name = "name", required = false) String name) {
         Optional<User> userOptional = Optional.ofNullable(this.userRepository.findByUsername(username));
         if (userOptional.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, "That user does not exist.");
@@ -116,7 +122,13 @@ public class UserController {
         User userToUpdate = userOptional.get();
 
         // Update the role
-        userToUpdate.setRole(role);
+        if (role != null) {
+            userToUpdate.setRole(role);
+        }
+        // Update the name
+        if (name != null) {
+            userToUpdate.setName(name);
+        }
 
         // Save
         this.userRepository.save(userToUpdate);
